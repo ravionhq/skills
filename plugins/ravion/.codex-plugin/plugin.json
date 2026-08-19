@@ -1,6 +1,6 @@
 {
   "name": "ravion",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Deploy and operate AWS infrastructure with Ravion from Codex using the Ravion agent skill and the Ravion Docs MCP server.",
   "author": {
     "name": "Ravion",
