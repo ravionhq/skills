@@ -39,10 +39,12 @@ No account yet? Send them to [app.ravion.com/signup](https://app.ravion.com/sign
 
 ## Connect AWS
 
-Ravion connects an AWS account through a CloudFormation stack that creates a cross-account IAM role. [AWS accounts settings](https://app.ravion.com/org/settings/aws-accounts?connect=%7B%7D) does this in the browser. The console flow and the AWS CLI flow deploy the same template, so use the CLI whenever the user already has credentials for the target account.
+Ravion connects an AWS account through a CloudFormation stack that creates a cross-account IAM role. You can do the whole thing from the terminal, and you should: `ravion aws account create` registers the account and the AWS CLI deploys the stack. Only send the user to [AWS accounts settings](https://app.ravion.com/org/settings/aws-accounts?connect=%7B%7D) when `aws sts get-caller-identity` fails or points at an account they do not want Ravion to manage — the browser flow deploys the same template.
+
+When `aws sts get-caller-identity` succeeds, ask the user only whether that account is the one to use, then run the rest yourself.
 
 ```bash
-aws sts get-caller-identity                                        # 1. confirm the credentials point at the account they want Ravion to manage
+aws sts get-caller-identity                                        # 1. confirm with the user that this is the account Ravion should manage
 ravion aws account create --given-id <id> --name "<Name>" --json   # 2. returns the Ravion account id, "aws_..."
 ravion aws account cloudformation-template-url <aws-account-id> --json  # 3. returns {"templateUrl": "...", "version": "..."}
 

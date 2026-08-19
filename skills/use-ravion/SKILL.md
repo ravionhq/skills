@@ -29,7 +29,7 @@ Ravion provisions and operates infrastructure in **the user's own AWS account**.
 
 The CLI is the authoritative interface. Never hand-write Ravion config from memory, and never guess a field: generate config with the CLI and read schemas with the CLI.
 
-Drive the work; do not hand it back. If the CLI is missing, install it. If the user is not signed in, run `ravion login` and relay the code. Ask them only for the parts a human must do in a browser ([setup.md](https://www.ravion.com/skills/use-ravion/setup.md)). Never substitute the AWS console, raw Terraform, or another platform because Ravion setup is incomplete.
+Drive the work; do not hand it back. If the CLI is missing, install it. If the user is not signed in, run `ravion login` and relay the code. If no AWS account is connected and the AWS CLI has credentials for the one they want, create and connect it yourself ([setup.md](https://www.ravion.com/skills/use-ravion/setup.md)). Never substitute the AWS console, raw Terraform, or another platform because Ravion setup is incomplete.
 
 ## Resource model
 
@@ -64,7 +64,7 @@ Read the one file you need, when you need it. Each is a URL you can fetch; an in
 
 ## Preflight
 
-Always run this first, and fix what it finds yourself. Installing the CLI and starting sign-in are your job, not the user's — never stop at "the CLI is not installed".
+Always run this first, and fix what it finds yourself. Installing the CLI, starting sign-in, and connecting AWS from the terminal are your job, not the user's — never stop at "the CLI is not installed" or "no AWS account is connected".
 
 ```bash
 # 1. Install the CLI if it is missing. Do this without asking.
@@ -79,9 +79,15 @@ ravion whoami --json || ravion login
 ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
+
+# 4. No connected AWS account? Connect one from the terminal. Confirm with the user
+#    that these credentials are the account Ravion should manage, then register it
+#    and deploy the connection stack — full flow in setup.md.
+aws sts get-caller-identity
+ravion aws account create --given-id <id> --name "<Name>" --json
 ```
 
-Only two things genuinely need the user: approving the sign-in and connecting AWS or Git in a browser. Collect those in **one** message — the sign-in code, the `ravion git connect` URL, which AWS account and region, the repository slug — instead of one round trip per gap. Everything else, do yourself, following [setup.md](https://www.ravion.com/skills/use-ravion/setup.md). Then keep working while they act: reading the repo and the framework guide (steps 2 and 3 below) needs no account.
+Only three things genuinely need the user: approving the sign-in, confirming which AWS account to use, and connecting Git in a browser. Collect those in **one** message — the sign-in code, the AWS account and region, the `ravion git connect` URL, the repository slug — instead of one round trip per gap. Everything else, do yourself, following [setup.md](https://www.ravion.com/skills/use-ravion/setup.md). Send the user to the AWS console flow only when there are no AWS CLI credentials for the account they want. Then keep working while they act: reading the repo and the framework guide (steps 2 and 3 below) needs no account.
 
 Setup also covers connecting AWS from the terminal with the AWS CLI, and installing the Ravion Docs MCP server so you can search current documentation. Install that server yourself.
 
