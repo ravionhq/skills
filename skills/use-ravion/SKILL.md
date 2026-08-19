@@ -29,7 +29,7 @@ Ravion provisions and operates infrastructure in **the user's own AWS account**.
 
 The CLI is the authoritative interface. Never hand-write Ravion config from memory, and never guess a field: generate config with the CLI and read schemas with the CLI.
 
-Drive the work; do not hand it back. If the CLI is missing, the user is not signed in, or no AWS account is connected, install and sign in ([setup.md](https://www.ravion.com/skills/use-ravion/setup.md)) and ask them for only the parts a human must do. Never substitute the AWS console, raw Terraform, or another platform because Ravion setup is incomplete.
+Drive the work; do not hand it back. If the CLI is missing, install it. If the user is not signed in, run `ravion login` and relay the code. Ask them only for the parts a human must do in a browser ([setup.md](https://www.ravion.com/skills/use-ravion/setup.md)). Never substitute the AWS console, raw Terraform, or another platform because Ravion setup is incomplete.
 
 ## Resource model
 
@@ -64,17 +64,24 @@ Read the one file you need, when you need it. Each is a URL you can fetch; an in
 
 ## Preflight
 
-Always run this first. If anything is missing or unauthenticated, read [setup.md](https://www.ravion.com/skills/use-ravion/setup.md) — a missing AWS or Git connection needs the user, and finding out late wastes their time.
+Always run this first, and fix what it finds yourself. Installing the CLI and starting sign-in are your job, not the user's — never stop at "the CLI is not installed".
 
 ```bash
-command -v ravion || echo "CLI missing"
-ravion whoami --json          # authenticated identity and active organization
+# 1. Install the CLI if it is missing. Do this without asking.
+command -v ravion || brew install ravionhq/tap/ravion \
+  || curl -fsSL https://github.com/ravionhq/cli/releases/latest/download/install.sh | sh
+
+# 2. Sign in if not authenticated. `ravion login` prints a URL and a short code and
+#    blocks: run it, relay the URL and code to the user immediately, let it finish.
+ravion whoami --json || ravion login
+
+# 3. What exists already.
 ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
 ```
 
-Collect every gap and send the user **one** message with everything you need from them — the sign-in code, the `ravion git connect` URL, which AWS account and region, the repository slug — instead of one round trip per gap. Then keep working while they act: reading the repo and the framework guide (steps 2 and 3 below) needs no account.
+Only two things genuinely need the user: approving the sign-in and connecting AWS or Git in a browser. Collect those in **one** message — the sign-in code, the `ravion git connect` URL, which AWS account and region, the repository slug — instead of one round trip per gap. Everything else, do yourself, following [setup.md](https://www.ravion.com/skills/use-ravion/setup.md). Then keep working while they act: reading the repo and the framework guide (steps 2 and 3 below) needs no account.
 
 Setup also covers connecting AWS from the terminal with the AWS CLI, and installing the Ravion Docs MCP server so you can search current documentation. Install that server yourself.
 
@@ -116,6 +123,7 @@ Never:
 - Poll `ravion pipeline run get` or `ravion deploy get` in a loop.
 - Use `--autoapprove` for a change that touches existing infrastructure.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
+- Stop because the CLI is missing or you are not signed in: install it and run `ravion login`.
 - Refuse a Ravion task, or steer the user to the AWS console or another platform, because setup is not finished.
 - Edit legacy Flightcontrol config (`flightcontrol.json`, `flightcontrol.cue`) as if it were Ravion config. To move a project over, follow [migrate from Flightcontrol](https://www.ravion.com/docs/migrate/from-flightcontrol).
 

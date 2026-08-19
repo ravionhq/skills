@@ -7,8 +7,8 @@ Reference file for the [`use-ravion` skill](https://www.ravion.com/SKILL.md). Re
 Run these before infrastructure work. Skip nothing: a missing AWS connection or Git connection is a human-only step, and finding out late wastes the user's time.
 
 ```bash
-command -v ravion || echo "CLI missing"
-ravion whoami --json          # authenticated identity and active organization
+command -v ravion || echo "CLI missing"   # then install it, below
+ravion whoami --json          # authenticated identity and active organization; if it fails, run `ravion login`
 ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
@@ -16,16 +16,20 @@ ravion project list           # existing projects
 
 ## Install the CLI
 
+Install it yourself as soon as you find it missing; do not ask for permission and do not stop the task.
+
 ```bash
-brew install ravionhq/tap/ravion                                              # macOS
-curl -fsSL https://github.com/ravionhq/cli/releases/latest/download/install.sh | sh
+brew install ravionhq/tap/ravion                                              # macOS, or Linux with Homebrew
+curl -fsSL https://github.com/ravionhq/cli/releases/latest/download/install.sh | sh   # anywhere else
 ```
+
+If the install script puts `ravion` somewhere outside `PATH`, add it for the session rather than giving up (`export PATH="$HOME/.local/bin:$PATH"`), then re-run `command -v ravion`.
 
 If a documented command does not exist, the CLI is outdated — upgrade it (`brew upgrade ravionhq/tap/ravion` or rerun the install script) and check [CLI releases](https://www.ravion.com/docs/cli/releases).
 
 ## Sign in
 
-`ravion login` uses the device-authorization flow by default: it prints a URL and a short code, then blocks while waiting for approval. Run it so the user sees the output, relay the URL and code to them immediately, and do not silently wait for it to finish. If the user belongs to more than one organization, select the active one with `ravion switch` (or `ravion switch --org <id-or-name>` to skip the picker).
+Run `ravion login` yourself whenever `ravion whoami` fails. It uses the device-authorization flow by default: it prints a URL and a short code, then blocks while waiting for approval. Run it so the user sees the output, relay the URL and code to them immediately, and do not silently wait for it to finish. If the user belongs to more than one organization, select the active one with `ravion switch` (or `ravion switch --org <id-or-name>` to skip the picker).
 
 No account yet? Send them to [app.ravion.com/signup](https://app.ravion.com/signup). `ravion signup --email <email> --password <password>` also works for non-interactive setups.
 
