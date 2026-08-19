@@ -71,14 +71,15 @@ environments:
     moduleInstances: [] # same module shape as production, usually smaller sizes
 ```
 
-Adding a database to an existing environment means adding a module instance to that environment's list and applying with `--environment-given-id <environment>`.
+Adding a database to an existing environment means adding a module instance to that environment's list, then applying scoped to it: `--environment-given-id staging --module-given-id database`.
 
 ## Approval rules
 
-Pass `--autoapprove` only when the apply _only creates_ new infrastructure, so its stack runs go straight through:
+Creating new infrastructure can go straight through with `--autoapprove`, scoped to what you are creating so an unrelated change cannot ride along:
 
 ```bash
-ravion project config apply <project-id> --file ravion.yaml --autoapprove
+ravion project config apply <project-id> --file ravion.yaml --autoapprove \
+  --environment-given-id <environment> --module-given-id <new-module>
 ```
 
 Omit `--autoapprove` when the change modifies, replaces, or removes existing infrastructure, so a human reviews each Terraform plan first. Removing a module instance plans a destroy and waits for manual approval.

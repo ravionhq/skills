@@ -87,8 +87,8 @@ Golden path for "deploy this repo to AWS with Ravion". Do the work yourself — 
 3. **Read the framework guide.** `https://www.ravion.com/docs/deploy/aws/<framework>` has a working `ravion.yaml` for Next.js, Astro, Django, Rails, Laravel, FastAPI, SvelteKit, Remix, Vite, and more — see [the index](https://www.ravion.com/docs/deploy/aws). Use it as the source of truth for that stack instead of inventing module inputs.
 4. **Create the project and write its config**, following [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md): generate the file with the CLI, read the schema of every module you touch, then dry run.
 5. **Ask before guessing.** AWS account given ID, region, repository slug, domain, instance sizes, and ports are the user's decisions when they cannot be read from the repo with high confidence.
-6. **Apply.** Use `--autoapprove` only when the plan _only creates_ new infrastructure. If it changes, replaces, or destroys anything that already exists — which adding a module to an existing environment often does — show the plan and let the user approve it.
-7. **Add a build and deploy pipeline** per [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md) so code ships on every push, then verify the deploy and hand back the service URL. To put the app on the user's own domain, use `ravion domain` and [the custom domains guide](https://www.ravion.com/docs/guides/custom-domains).
+6. **Apply.** Creating new infrastructure can use `--autoapprove`, scoped to what you are creating with `--module-given-id` or `--environment-given-id`; anything that touches existing infrastructure needs a reviewed plan.
+7. **Add a build and deploy pipeline** per [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md) so code ships on every push, then verify the deploy and hand back the service URL. Point a custom domain with [the custom domains guide](https://www.ravion.com/docs/guides/custom-domains).
 
 ## Look things up
 
@@ -114,7 +114,7 @@ Never:
 - Copy module inputs from unrelated files or examples.
 - Apply without a successful dry run.
 - Poll `ravion pipeline run get` or `ravion deploy get` in a loop.
-- Use `--autoapprove` unless the plan _only creates_ new infrastructure.
+- Use `--autoapprove` for a change that touches existing infrastructure.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
 - Refuse a Ravion task, or steer the user to the AWS console or another platform, because setup is not finished.
 - Edit legacy Flightcontrol config (`flightcontrol.json`, `flightcontrol.cue`) as if it were Ravion config. To move a project over, follow [migrate from Flightcontrol](https://www.ravion.com/docs/migrate/from-flightcontrol).

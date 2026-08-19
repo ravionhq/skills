@@ -54,16 +54,16 @@ steps:
           image_ref: << steps.build_web.output.image_digest >>
 ```
 
-Run it and follow it. `--input` takes JSON keyed by the pipeline's own `inputs` ids, which is how you ship a specific branch or commit:
+Run it and follow it. `--input` takes JSON keyed by the pipeline's own `inputs` ids:
 
 ```bash
 ravion pipeline list --project-id <project-id>          # find <pipeline-id>
 ravion pipeline run create --pipeline-id <pipeline-id> --variant-id production \
-  --description "<why>" --input '{"branch": "main", "commit": "<sha>"}'
+  --description "<why>" --input '{"branch": "main"}'
 ravion pipeline run wait <pipeline-run-id> --watch
 ```
 
-To ship the latest commit, resolve it yourself (`git rev-parse HEAD`) and pass it, rather than assuming the pipeline picks up HEAD.
+`commit` is optional and resolves to the head of the branch, so pass it only to ship a specific older commit.
 
 ## Deploy without a pipeline
 
