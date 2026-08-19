@@ -13,7 +13,7 @@ description: >
   Heroku, Vercel, Railway, or Render to AWS, or debug a failed Ravion deploy,
   Terraform plan, or stack run — even if they don't say "Ravion" explicitly.
 license: MIT
-allowed-tools: Bash(ravion:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
+allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
   version: "1.0.0"
@@ -78,9 +78,48 @@ No account yet? Send them to [app.ravion.com/signup](https://app.ravion.com/sign
 
 **Human-only prerequisites.** These require a browser and the user's cloud and Git permissions. Stop and ask the user to complete the ones that are missing, then continue:
 
-- Connect AWS: [AWS accounts settings](https://app.ravion.com/org/settings/aws-accounts?connect=%7B%7D). This runs a CloudFormation template in their account. `ravion aws account cloudformation-template-url <aws-account-id>` prints the template URL for an account created with `ravion aws account create --given-id <id> --name <name>`.
+- Connect AWS: [AWS accounts settings](https://app.ravion.com/org/settings/aws-accounts?connect=%7B%7D) runs a CloudFormation stack in their account. If they are already signed in to the AWS CLI for that account, do it from the terminal instead — see [Connect AWS from the terminal](#connect-aws-from-the-terminal).
 - Connect Git: `ravion git connect` (add `--no-browser` to print the URL). Needed for building from source; not needed when deploying an image from a registry.
-- Install the Docs MCP server so you can search current documentation: `npx add-mcp https://www.ravion.com/docs/mcp --name ravion-docs`.
+
+### Install the Docs MCP server
+
+The Ravion Docs MCP server lets you search current documentation instead of guessing. Install it yourself — do not ask the user to do it.
+
+First check whether its tools are already available to you in this session. If they are, use them and skip the rest. If they are not:
+
+```bash
+npx add-mcp https://www.ravion.com/docs/mcp --name ravion-docs   # writes the config for the agent host it detects
+```
+
+- MCP servers load when the agent starts, so the tools do not appear until the user restarts this session. Tell them that, and keep working — do not block on it.
+- Until then, read documentation over HTTP: any page is Markdown at `https://www.ravion.com/docs/<path>.md`, and `https://www.ravion.com/docs/llms.txt` indexes the site.
+- In Claude Code, `claude mcp add --transport http ravion-docs https://www.ravion.com/docs/mcp` does the same thing. If a host writes MCP config somewhere you cannot edit, print the URL and let the user add it.
+
+### Connect AWS from the terminal
+
+Ravion connects an AWS account through a CloudFormation stack that creates a cross-account IAM role. The console flow and the AWS CLI flow deploy the same template, so use the CLI whenever the user already has credentials for the target account.
+
+```bash
+aws sts get-caller-identity                                        # 1. confirm the credentials point at the account they want Ravion to manage
+ravion aws account create --given-id <id> --name "<Name>" --json   # 2. returns the Ravion account id, "aws_..."
+ravion aws account cloudformation-template-url <aws-account-id> --json  # 3. returns {"templateUrl": "...", "version": "..."}
+
+# 4. deploy the template, always in us-east-1
+aws cloudformation create-stack \
+  --region us-east-1 \
+  --stack-name ravion-<aws-account-id> \
+  --template-url "<templateUrl>" \
+  --capabilities CAPABILITY_NAMED_IAM
+
+aws cloudformation wait stack-create-complete --region us-east-1 --stack-name ravion-<aws-account-id>
+ravion aws account get <aws-account-id> --json                     # 5. status flips to CONNECTED
+```
+
+- Show the user the output of `aws sts get-caller-identity` and confirm the account number before creating the stack. It is the only check that the credentials belong to the account they mean.
+- Create the stack in `us-east-1`. Its authenticator custom resource lives there. The role it creates lets Ravion provision in any region.
+- Pass no `--parameters`. The template already carries the account id and a single-use onboarding token, so treat the URL as a secret and fetch it right before creating the stack.
+- `CAPABILITY_NAMED_IAM` is required: the stack creates a named role and named managed policies. Replace `_` with `-` in the account id when it appears in the stack name.
+- Upgrading permissions: when `ravion aws account get` reports a `roleVersion` older than `latestRoleVersion`, show the user `ravion aws account policy-diff <aws-account-id>`, then update the same stack with a freshly fetched template URL — `aws cloudformation update-stack --region us-east-1 --stack-name <name> --template-url "<templateUrl>" --capabilities CAPABILITY_NAMED_IAM`. The `cfnStackId` from step 3 identifies the existing stack when the name is unknown.
 
 ## Deploy this project
 
@@ -275,7 +314,7 @@ Keep config files in the repository, plan on pull requests, apply on merge. The 
 
 ## Look things up
 
-- Docs MCP server (preferred): `npx add-mcp https://www.ravion.com/docs/mcp --name ravion-docs`, then search and read pages from your context.
+- Docs MCP server (preferred): search and read pages from your context. See [Install the Docs MCP server](#install-the-docs-mcp-server).
 - Any docs page is readable as Markdown at `https://www.ravion.com/docs/<path>.md`, and the whole site is indexed at `https://www.ravion.com/docs/llms.txt`.
 - Module catalog: [`https://www.ravion.com/docs/module-definitions/catalog`](https://www.ravion.com/docs/module-definitions/catalog). CLI reference: [`https://www.ravion.com/docs/cli/overview`](https://www.ravion.com/docs/cli/overview).
 - Every CLI command supports `--help`, and most reads support `--json`. Prefer `--json` when you need to parse output.
@@ -303,11 +342,21 @@ Never:
 
 ## Report bugs and feedback
 
-When a command fails unexpectedly or Ravion behaves differently than documented, file it. Both commands are non-interactive, exit `0` on success, and are safe to run unattended.
+Report friction, not just breakage. Both commands are non-interactive, exit `0` on success, and are safe to run unattended, so use them as you go rather than saving them for the end.
 
 ```bash
 ravion report bug "<what happened and what you expected>" --command "<the command that failed>"
 ravion report feedback "<what was confusing, harder than it should be, or missing>"
 ```
 
-Include the exact error text and the IDs of the resources involved.
+Send a bug when a command fails unexpectedly, errors misleadingly, or Ravion behaves differently than documented. Include the exact error text and the IDs of the resources involved.
+
+Send feedback whenever the product got in your way, even though you eventually finished:
+
+- A task took more steps, guesses, or retries than it should have.
+- You could not tell which command, module, or field to use, or the docs and CLI disagreed.
+- You needed something the CLI or API does not expose, and worked around it in the console, in raw Terraform, or by hand.
+- An error message did not say what to do next.
+- You had to ask the user for something the tooling could have determined itself.
+
+Say what you were trying to do, what you tried, and what would have made it obvious. This is the main way these rough edges get found, so err on the side of sending it.
