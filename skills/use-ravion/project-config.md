@@ -27,7 +27,9 @@ A typical containerized web app is `rvn-aws-network` → `rvn-ecs-cluster` → `
 
 ## File shape
 
-Modules wire together by `moduleGivenIdRef`:
+Every environment the user talks about (`production`, `staging`, `preview`) is its own entry under `environments`, and `--environment-given-id staging` targets one of them. Modules wire together by `moduleGivenIdRef` — `{moduleGivenIdRef: "module"}` in the same environment, `"environment.module"` across environments, `"project.environment.module"` across projects.
+
+A database module takes `network: {moduleGivenIdRef: network}`, the same network the cluster uses. The service does **not** get a typed reference to it: `rvn-ecs-web` reads database credentials through runtime `secrets` (`{name, value_from}` pointing at Secrets Manager or SSM), so create the secret from the database outputs and pass it there. Read `ravion module schema rvn-rds` and `ravion module schema rvn-ecs-web` before wiring either side.
 
 ```yaml
 project:
@@ -64,7 +66,12 @@ environments:
           build_source: railpack
           source_repo: my-org/my-repo
           container_port: 3000
+  - givenId: staging
+    name: Staging
+    moduleInstances: [] # same module shape as production, usually smaller sizes
 ```
+
+Adding a database to an existing environment means adding a module instance to that environment's list and applying with `--environment-given-id <environment>`.
 
 ## Approval rules
 

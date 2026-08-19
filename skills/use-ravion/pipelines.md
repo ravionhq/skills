@@ -54,18 +54,23 @@ steps:
           image_ref: << steps.build_web.output.image_digest >>
 ```
 
-Run it and follow it:
+Run it and follow it. `--input` takes JSON keyed by the pipeline's own `inputs` ids, which is how you ship a specific branch or commit:
 
 ```bash
-ravion pipeline run create --pipeline-id <pipeline-id> --variant-id production --description "<why>"
+ravion pipeline list --project-id <project-id>          # find <pipeline-id>
+ravion pipeline run create --pipeline-id <pipeline-id> --variant-id production \
+  --description "<why>" --input '{"branch": "main", "commit": "<sha>"}'
 ravion pipeline run wait <pipeline-run-id> --watch
 ```
+
+To ship the latest commit, resolve it yourself (`git rev-parse HEAD`) and pass it, rather than assuming the pipeline picks up HEAD.
 
 ## Deploy without a pipeline
 
 Deploy code directly to one module, for example from external CI:
 
 ```bash
+ravion module list --project-id <project-id>            # find <module-instance-id>
 ravion deploy create --module-instance-id <module-instance-id> --description "<why>" --inputs '<json>'
 ravion deploy wait <deployment-id> --watch
 ```
@@ -75,8 +80,10 @@ The `--inputs` keys come from the module's deploy manager — check `ravion depl
 ## Roll back
 
 ```bash
-ravion deploy rollback-candidates <module-instance-id>
+ravion module list --project-id <project-id>            # find <module-instance-id>
+ravion deploy rollback-candidates <module-instance-id>   # earlier deploys you can return to
 ravion deploy rollback <deployment-id>
+ravion deploy wait <deployment-id> --watch
 ```
 
 Reference: [pipeline config file](https://www.ravion.com/docs/config-as-code/pipeline-config-file), [step types](https://www.ravion.com/docs/pipelines/step-types), [templating](https://www.ravion.com/docs/pipelines/templating).

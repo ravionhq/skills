@@ -44,19 +44,20 @@ Two independent tracks of change, which is the key mental model:
 
 ## Route by intent
 
-Read the one file you need, when you need it. Each is a URL you can fetch; installed copies keep the same file names next to this one.
+Read the one file you need, when you need it. Each is a URL you can fetch; an installed copy of this skill has the same files next to it as `setup.md`, `project-config.md`, `pipelines.md`, and `operations.md`.
 
-| The user wants                                   | Read                                                                                                |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| "Deploy this project/repo to AWS with Ravion"    | [Deploy this project](#deploy-this-project) below, which pulls in the files as it goes              |
-| Add, change, or remove infrastructure            | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md) |
-| Build and ship code, automate deploys, roll back | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)           |
-| Inspect state, debug a failure, read logs        | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)         |
-| Install the CLI, sign in, connect AWS or Git, CI | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
+| The user wants                                                    | Read                                                                                                |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| "Deploy this project/repo to AWS with Ravion"                     | [Deploy this project](#deploy-this-project) below, which pulls in the files as it goes              |
+| Add, change, or remove infrastructure                             | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md) |
+| Build and ship code, automate deploys, roll back                  | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)           |
+| Inspect state, debug a failure, read logs                         | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)         |
+| Install the CLI, sign in, connect AWS or Git, CI                  | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
+| Anything else — custom domains, secrets, quotas, a specific error | Search the docs, per [Look things up](#look-things-up) below                                        |
 
 ## Preflight
 
-Always run this first. If anything is missing or unauthenticated, read [setup.md](https://www.ravion.com/skills/use-ravion/setup.md) before continuing — a missing AWS or Git connection needs the user, and finding out late wastes their time.
+Always run this first. If anything is missing or unauthenticated, read [setup.md](https://www.ravion.com/skills/use-ravion/setup.md) — a missing AWS or Git connection needs the user, and finding out late wastes their time.
 
 ```bash
 command -v ravion || echo "CLI missing"
@@ -65,6 +66,8 @@ ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
 ```
+
+Collect every gap and send the user **one** message with everything you need from them — the sign-in code, the `ravion git connect` URL, which AWS account and region, the repository slug — instead of one round trip per gap. Then keep working while they act: reading the repo and the framework guide (steps 2 and 3 below) needs no account.
 
 Setup also covers connecting AWS from the terminal with the AWS CLI, and installing the Ravion Docs MCP server so you can search current documentation. Install that server yourself.
 
@@ -77,8 +80,8 @@ Golden path for "deploy this repo to AWS with Ravion". Do the work yourself — 
 3. **Read the framework guide.** `https://www.ravion.com/docs/deploy/aws/<framework>` has a working `ravion.yaml` for Next.js, Astro, Django, Rails, Laravel, FastAPI, SvelteKit, Remix, Vite, and more — see [the index](https://www.ravion.com/docs/deploy/aws). Use it as the source of truth for that stack instead of inventing module inputs.
 4. **Create the project and write its config**, following [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md): generate the file with the CLI, read the schema of every module you touch, then dry run.
 5. **Ask before guessing.** AWS account given ID, region, repository slug, domain, instance sizes, and ports are the user's decisions when they cannot be read from the repo with high confidence.
-6. **Apply.** New infrastructure can use `--autoapprove`; anything that touches existing infrastructure needs a reviewed plan.
-7. **Add a build and deploy pipeline** per [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md) so code ships on every push, then verify the deploy and hand back the service URL. Point a custom domain with [the custom domains guide](https://www.ravion.com/docs/guides/custom-domains).
+6. **Apply.** Use `--autoapprove` only when the plan _only creates_ new infrastructure. If it changes, replaces, or destroys anything that already exists — which adding a module to an existing environment often does — show the plan and let the user approve it.
+7. **Add a build and deploy pipeline** per [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md) so code ships on every push, then verify the deploy and hand back the service URL. To put the app on the user's own domain, use `ravion domain` and [the custom domains guide](https://www.ravion.com/docs/guides/custom-domains).
 
 ## Look things up
 
@@ -104,7 +107,7 @@ Never:
 - Copy module inputs from unrelated files or examples.
 - Apply without a successful dry run.
 - Poll `ravion pipeline run get` or `ravion deploy get` in a loop.
-- Use `--autoapprove` for a change that touches existing infrastructure.
+- Use `--autoapprove` unless the plan _only creates_ new infrastructure.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
 - Edit legacy Flightcontrol config (`flightcontrol.json`, `flightcontrol.cue`) as if it were Ravion config. To move a project over, follow [migrate from Flightcontrol](https://www.ravion.com/docs/migrate/from-flightcontrol).
 
@@ -128,3 +131,5 @@ Send feedback whenever the product got in your way, even though you eventually f
 - You had to ask the user for something the tooling could have determined itself.
 
 Say what you were trying to do, what you tried, and what would have made it obvious. This is the main way these rough edges get found, so err on the side of sending it.
+
+If the CLI is not installed or authenticated yet — which is exactly when the roughest edges show up — you cannot run these commands. Tell the user the friction in your own reply instead, and send it with `ravion report feedback` once the CLI works. Do not drop it.
