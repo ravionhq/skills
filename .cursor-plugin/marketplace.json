@@ -1,0 +1,17 @@
+{
+  "name": "ravion-plugin",
+  "owner": {
+    "name": "Ravion",
+    "email": "support@ravion.com"
+  },
+  "metadata": {
+    "description": "Ravion agent skills and the Ravion Docs MCP server for deploying and operating AWS infrastructure from Cursor."
+  },
+  "plugins": [
+    {
+      "name": "ravion",
+      "source": "plugins/ravion",
+      "description": "Ravion agent skill and Ravion Docs MCP server for deploying and operating AWS infrastructure from Cursor: connect an AWS account, define projects and modules in a ravion.yaml project config file, build and deploy code through pipelines, follow stack runs and approvals, inspect logs and metrics, and roll back."
+    }
+  ]
+}

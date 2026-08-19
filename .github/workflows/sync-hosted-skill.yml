@@ -1,0 +1,28 @@
+name: Sync hosted skill
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the hosted skill
+        run: curl -fsSL https://www.ravion.com/SKILL.md -o skills/use-ravion/SKILL.md
+      - name: Open a pull request when the hosted skill changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: sync-hosted-skill
+          title: Sync use-ravion skill from www.ravion.com/SKILL.md
+          body: |
+            The hosted skill at https://www.ravion.com/SKILL.md changed. This mirrors it here so
+            `npx skills add ravionhq/skills` and the plugin marketplaces ship the same instructions.
+          commit-message: Sync use-ravion skill from the hosted copy
+          add-paths: skills/use-ravion/SKILL.md

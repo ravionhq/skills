@@ -1,0 +1,22 @@
+{
+  "name": "ravion",
+  "version": "1.0.0",
+  "description": "Ravion agent skill and Ravion Docs MCP server for deploying and operating AWS infrastructure from Grok: connect an AWS account, define projects and modules in a ravion.yaml project config file, build and deploy code through pipelines, follow stack runs and approvals, inspect logs and metrics, and roll back.",
+  "author": {
+    "name": "Ravion",
+    "email": "support@ravion.com"
+  },
+  "homepage": "https://www.ravion.com/docs/start-here",
+  "repository": "https://github.com/ravionhq/skills",
+  "license": "MIT",
+  "mcpServers": "./.grok-plugin/mcp.json",
+  "keywords": [
+    "ravion",
+    "aws",
+    "deployment",
+    "infrastructure",
+    "terraform",
+    "mcp",
+    "agent-skills"
+  ]
+}

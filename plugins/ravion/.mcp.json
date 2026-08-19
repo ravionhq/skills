@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "ravion-docs": {
+      "type": "http",
+      "url": "https://www.ravion.com/docs/mcp"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "ravion",
+  "version": "1.0.0",
+  "description": "Deploy and operate AWS infrastructure with Ravion from Codex using the Ravion agent skill and the Ravion Docs MCP server.",
+  "author": {
+    "name": "Ravion",
+    "email": "support@ravion.com",
+    "url": "https://www.ravion.com"
+  },
+  "homepage": "https://www.ravion.com/docs/start-here",
+  "repository": "https://github.com/ravionhq/skills",
+  "license": "MIT",
+  "keywords": [
+    "ravion",
+    "aws",
+    "deployment",
+    "infrastructure",
+    "terraform",
+    "mcp",
+    "agent-skills"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Ravion",
+    "shortDescription": "Deploy and operate AWS infrastructure with Ravion.",
+    "longDescription": "Use Ravion from Codex to deploy applications to your own AWS account: connect an AWS account and Git repository, define projects, environments, and modules in a ravion.yaml project config file, review Terraform plans and approve stack runs, build and deploy code through pipelines, inspect logs and metrics, and roll back.",
+    "developerName": "Ravion",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://www.ravion.com",
+    "defaultPrompt": [
+      "Deploy this project to AWS with Ravion.",
+      "Add a Postgres database to my Ravion project.",
+      "Debug the latest Ravion deploy."
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ravion-skills",
+  "description": "Ravion agent skills and the Ravion Docs MCP server for deploying and operating AWS infrastructure from Claude Code.",
+  "owner": {
+    "name": "Ravion",
+    "email": "support@ravion.com"
+  },
+  "plugins": [
+    {
+      "name": "ravion",
+      "description": "Ravion agent skill and Ravion Docs MCP server for deploying and operating AWS infrastructure from Claude Code: connect an AWS account, define projects and modules in a ravion.yaml project config file, build and deploy code through pipelines, follow stack runs and approvals, inspect logs and metrics, and roll back.",
+      "author": {
+        "name": "Ravion"
+      },
+      "source": "./plugins/ravion",
+      "category": "deployment",
+      "homepage": "https://www.ravion.com/docs/start-here"
+    }
+  ]
+}
