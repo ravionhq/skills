@@ -8,11 +8,28 @@ Run these before infrastructure work. Skip nothing: a missing AWS connection or 
 
 ```bash
 command -v ravion || echo "CLI missing"   # then install it, below
-ravion whoami --json          # authenticated identity and active organization; if it fails, run `ravion login`
+ravion whoami --json          # authenticated identity and active organization; if it fails, keep going and sign in later
 ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
 ```
+
+## What works without an account
+
+A failing `ravion whoami` gates the last mile, not the work. Take the task as far as the first write before you ask the user for anything.
+
+No session needed:
+
+```bash
+ravion project config schema      # project config file schema
+ravion pipeline schema            # pipeline config file schema
+ravion module definition schema   # module definition schema
+ravion --help                     # and `--help` on any command
+```
+
+Also unauthenticated: reading the repo to detect the framework, build command, and port; the framework guides under `https://www.ravion.com/docs/deploy/aws/<framework>.md`; and every module's inputs at `https://www.ravion.com/docs/module-definitions/catalog/<module-type>.md`. Together that is enough to write complete `ravion.yaml` and `ravion-pipeline.yaml` drafts.
+
+A session is required for `ravion module schema <type>`, `ravion module definition list`, `project create`, `config pull`, `config apply`, and everything else that reads or writes the user's organization. When you get one, regenerate the file with the CLI (`ravion project create --given-id <id> --name "<Name>" --file ravion.yaml`), fold your draft into it, and re-check every input against `ravion module schema <type>` before the dry run — the generated file carries the current header, comments, and links, and the schema is authoritative over the docs page.
 
 ## Install the CLI
 
@@ -29,9 +46,9 @@ If a documented command does not exist, the CLI is outdated — upgrade it (`bre
 
 ## Sign in
 
-Run `ravion login` yourself whenever `ravion whoami` fails. It uses the device-authorization flow by default: it prints a URL and a short code, then blocks while waiting for approval. Run it so the user sees the output, relay the URL and code to them immediately, and do not silently wait for it to finish. If the user belongs to more than one organization, select the active one with `ravion switch` (or `ravion switch --org <id-or-name>` to skip the picker).
+Run `ravion login` yourself when you reach the first command that needs a session — not before. It uses the device-authorization flow by default: it prints a URL and a short code, then blocks while waiting for approval. Run it so the user sees the output, relay the URL and code to them immediately, and do not silently wait for it to finish. If the user belongs to more than one organization, select the active one with `ravion switch` (or `ravion switch --org <id-or-name>` to skip the picker).
 
-No account yet? Send them to [app.ravion.com/signup](https://app.ravion.com/signup). `ravion signup --email <email> --password <password>` also works for non-interactive setups.
+No account yet? Send them to [app.ravion.com/signup](https://app.ravion.com/signup). `ravion signup --email <email> --password <password>` also works for non-interactive setups. Ask for signup once you have something to show — the drafted config and the module set you picked — and put the AWS account and Git questions in the same message.
 
 ## Connect Git
 

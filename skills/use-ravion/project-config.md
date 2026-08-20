@@ -19,9 +19,11 @@ ravion project create --given-id <project-id> --name "<Project name>" --file rav
 ravion project config pull <project-id> --file ravion.yaml                                 # existing project
 ```
 
+Both need a session. Without one, do not wait: draft the file from `ravion project config schema` (public) plus each module's catalog page at `https://www.ravion.com/docs/module-definitions/catalog/<module-type>.md`, show the user the draft, and ask them to sign up or sign in. Once they have, run the generating command above and fold your draft into the file it writes, then re-check every input against `ravion module schema <type>` — a drafted file is a starting point, never what you apply.
+
 ## Module set
 
-List definitions with `ravion module definition list`, then read the input schema of every module you touch with `ravion module schema <module-type> [version]`.
+List definitions with `ravion module definition list`, then read the input schema of every module you touch with `ravion module schema <module-type> [version]`. Both need a session; while drafting without one, use the [module catalog](https://www.ravion.com/docs/module-definitions/catalog) pages, then confirm against `ravion module schema` before applying.
 
 A typical containerized web app is `rvn-aws-network` → `rvn-ecs-cluster` → `rvn-ecs-web`; a static site is `rvn-aws-static`. Add `rvn-rds` or `rvn-aurora` for Postgres/MySQL, `rvn-elasticache` for Redis, `rvn-s3` for buckets, `rvn-lambda` for functions, `rvn-ecs-worker` for background workers. Full list: [module catalog](https://www.ravion.com/docs/module-definitions/catalog).
 
