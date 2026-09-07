@@ -19,7 +19,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.1.0"
+  version: "2.2.0"
   homepage: "https://www.ravion.com/docs"
 ---
 
@@ -29,9 +29,11 @@ Ravion provisions and operates infrastructure in **the user's own AWS account**.
 
 The CLI is the authoritative interface. Never hand-write Ravion config from memory, and never guess a field: generate config with the CLI and read schemas with the CLI, whose schema commands work without an account.
 
-Drive the work; do not hand it back. If the CLI is missing, install it. If no AWS account is connected and the AWS CLI has credentials for the one they want, create and connect it yourself ([setup.md](https://www.ravion.com/skills/use-ravion/setup.md)). Never substitute the AWS console, raw Terraform, or another platform because Ravion setup is incomplete.
+Drive the work; do not hand it back. The user's request to deploy or operate with Ravion is the authorization to install the CLI and to read everything that needs no account. Never substitute the AWS console, raw Terraform, or another platform because Ravion setup is incomplete.
 
 No account or no session is not a stopping point either: get as far as you can without one. Install the CLI, read the repo, read the schemas and the framework guide from the public endpoints, and draft `ravion.yaml` — then ask the user to sign up or sign in, with the draft already in hand.
+
+Three actions cross a trust boundary and need the user's explicit yes first, every time: signing in (they approve the device code), connecting an AWS account (a CloudFormation stack that creates an IAM role in their account — confirm the account ID from `aws sts get-caller-identity` before creating it), and applying a plan that changes existing infrastructure. Everything else, do yourself; see [setup.md](https://www.ravion.com/skills/use-ravion/setup.md).
 
 ## Resource model
 
@@ -44,7 +46,7 @@ No account or no session is not a stopping point either: get as far as you can w
 
 Hierarchy: `Organization → Project → Environment → Module instance`. Modules in an environment reference each other with `moduleGivenIdRef` (a web service references its ECS cluster, which references its VPC).
 
-Ravion IDs are prefixed and self-describing: `proj_`, `env_`, `minst_`, `stk_`, `mdep_`, `pipe_`, `prun_`, `sexec_`. When the user pastes an ID or a dashboard URL, pull the ID out of it and run `ravion describe <id>` before anything else — that tells you what the resource is and which commands apply.
+Ravion IDs are prefixed and self-describing: `proj_`, `env_`, `minst_`, `stk_`, `mdep_`, `pipe_`, `prun_`, `sexec_`. An `app.ravion.com` URL is just these IDs in hierarchy order — `/org/<org-id>/projects/<proj_…>/environments/<env_…>/modules/<minst_…>/deployments/<mdep_…>` — so pull the most specific ID out of the path and run `ravion describe <id>`; never search for or open the URL. `describe` tells you what the resource is and which commands apply.
 
 Two independent tracks of change, which is the key mental model:
 
@@ -69,9 +71,9 @@ Read the one file you need, when you need it. Each is a URL you can fetch; an in
 Always run this first, and fix what it finds yourself. Installing the CLI and connecting AWS from the terminal are your job, not the user's — never stop at "the CLI is not installed" or "no AWS account is connected".
 
 ```bash
-# 1. Install the CLI if it is missing. Do this without asking.
-command -v ravion || brew install ravionhq/tap/ravion \
-  || curl -fsSL https://github.com/ravionhq/cli/releases/latest/download/install.sh | sh
+# 1. Install the CLI if it is missing (Homebrew, or the checksum-verified
+#    installer from the ravionhq/cli releases — details in setup.md).
+command -v ravion || echo "CLI missing"
 
 # 2. Check for a session. This failing is not a stopping point — note it and keep going.
 ravion whoami --json
@@ -81,16 +83,15 @@ ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
 
-# 4. No connected AWS account? Connect one from the terminal. Confirm with the user
-#    that these credentials are the account Ravion should manage, then register it
-#    and deploy the connection stack — full flow in setup.md.
+# 4. No connected AWS account? Show the user which credentials the AWS CLI holds and
+#    get an explicit yes that this is the account Ravion should manage. Only then
+#    register it and deploy the connection stack — full flow in setup.md.
 aws sts get-caller-identity
-ravion aws account create --given-id <id> --name "<Name>" --json
 ```
 
 No session yet? Do not ask for one and wait. Everything up to the first write is unauthenticated: reading the repo, the framework guide, `ravion project config schema`, `ravion pipeline schema`, `ravion module definition schema`, and the module catalog pages — enough to draft `ravion.yaml` and `ravion-pipeline.yaml` in full. Work through steps 2–4 of [Deploy this project](#deploy-this-project) first, then ask, so the user signs up against a finished draft instead of an empty prompt. `ravion signup --email <email> --password <password>` is non-interactive when they want that; otherwise [app.ravion.com/signup](https://app.ravion.com/signup), then `ravion login`.
 
-Only three things genuinely need the user: signing up or approving the sign-in, confirming which AWS account to use, and connecting Git in a browser. Collect those in **one** message — the signup link or sign-in code, the AWS account and region, the `ravion git connect` URL, the repository slug — instead of one round trip per gap. Everything else, do yourself, following [setup.md](https://www.ravion.com/skills/use-ravion/setup.md). Send the user to the AWS console flow only when there are no AWS CLI credentials for the account they want. Then keep working while they act.
+Only three things genuinely need the user: signing up or approving the sign-in, confirming which AWS account to use, and connecting Git in a browser. Collect those in **one** message — the signup link or sign-in code, the AWS account ID and region, the `ravion git connect` URL, the repository slug — instead of one round trip per gap. Everything else, do yourself, following [setup.md](https://www.ravion.com/skills/use-ravion/setup.md). Send the user to the AWS console flow when there are no AWS CLI credentials for the account they want, or when they prefer to create the IAM role themselves. Then keep working while they act.
 
 Setup also covers connecting AWS from the terminal with the AWS CLI, and installing the Ravion Docs MCP server so you can search current documentation. Install that server yourself.
 
@@ -123,6 +124,7 @@ Always:
 - Dry run every change, and show the user the planned diff before applying.
 - Preserve existing IDs, `givenId` values, module versions, and links you did not intend to change.
 - Ask before production-impacting changes: public access, deletion protection, backup retention, capacity, region, networking exposure.
+- Get an explicit yes before anything that changes the user's AWS account outside a Ravion stack: creating or updating the connection CloudFormation stack, or anything else with `aws` that writes.
 - Use `wait --watch` to follow runs and deploys.
 
 Never:
@@ -134,6 +136,9 @@ Never:
 - Use `--autoapprove` for a change that touches existing infrastructure.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
 - Stop because the CLI is missing or you are not signed in: install it, get as far as the draft config, then ask.
+- Create IAM roles or CloudFormation stacks, or approve a plan that touches existing infrastructure, on the user's behalf without their explicit confirmation of that specific action.
+- Print, log, or paste secret values (API keys, the CloudFormation template URL, database credentials) into the conversation or into files the user did not ask for; pass them straight to the command that needs them.
+- Web-search, fetch, or open in a browser an `app.ravion.com` URL the user pasted; parse its IDs and use the CLI.
 - Ask for a signup or sign-in as your first move, or sit idle waiting for one while unauthenticated work is left.
 - Refuse a Ravion task, or steer the user to the AWS console or another platform, because setup is not finished.
 - Edit legacy Flightcontrol config (`flightcontrol.json`, `flightcontrol.cue`) as if it were Ravion config. To move a project over, follow [migrate from Flightcontrol](https://www.ravion.com/docs/migrate/from-flightcontrol).

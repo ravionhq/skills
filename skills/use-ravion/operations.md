@@ -3,7 +3,7 @@
 Reference file for the [`use-ravion` skill](https://www.ravion.com/SKILL.md). Read it when a run, deploy, or resource is failing, or when you need current state.
 
 ```bash
-ravion describe <id>                          # any Ravion ID: proj_, env_, mod_, stack_, prun_, dep_
+ravion describe <id>                          # any Ravion ID: proj_, env_, minst_, stk_, mdep_, pipe_, prun_, sexec_ — take it from the user's app.ravion.com URL path
 ravion environment module-graph <env-id>      # module dependency graph
 ravion module list / ravion module get <id>
 ravion stack get <id>                         # Terraform state, resources, outputs
