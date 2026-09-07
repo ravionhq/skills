@@ -46,13 +46,7 @@ Three actions cross a trust boundary and need the user's explicit yes first, eve
 
 Hierarchy: `Organization → Project → Environment → Module instance`. Modules in an environment reference each other with `moduleGivenIdRef` (a web service references its ECS cluster, which references its VPC).
 
-Ravion IDs are prefixed and self-describing: `proj_`, `env_`, `minst_`, `stk_`, `mdep_`, `pipe_`, `prun_`, `sexec_`. When the user pastes an ID or an `app.ravion.com` URL, the IDs are already in your hands — never search the web for the URL and never open it in a browser. Read the path: it mirrors the hierarchy, and every segment after a resource noun is that resource's ID.
-
-```text
-https://app.ravion.com/org/<org-id>/projects/<proj_…>/environments/<env_…>/modules/<minst_…>/deployments/<mdep_…>
-```
-
-`/org/<org-id>` is the organization (`ravion switch --org <org-id>` if `ravion whoami` shows a different one); `/projects/` the project, `/environments/` the environment, `/modules/` the module instance, and its children `/deployments/<mdep_…>` and `/stack/<stk_…>`. Pipeline pages are `/projects/<proj_…>/pipelines/<pipe_…>/runs/<prun_…>`. Then run `ravion describe <id>` on the most specific ID (a session is required) — it tells you what the resource is, its given IDs, and its parents, so you know which commands apply. Changing a module (its version, an input) means `ravion project config pull <proj_…>`, editing that module's entry, then `ravion project config apply <proj_…> --file … --module-instance-id <minst_…>` — dry run first, per [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md). Inspecting a deployment or run is `ravion deploy get <mdep_…>` / `ravion pipeline run get <prun_…>`, per [operations.md](https://www.ravion.com/skills/use-ravion/operations.md).
+Ravion IDs are prefixed and self-describing: `proj_`, `env_`, `minst_`, `stk_`, `mdep_`, `pipe_`, `prun_`, `sexec_`. An `app.ravion.com` URL is just these IDs in hierarchy order — `/org/<org-id>/projects/<proj_…>/environments/<env_…>/modules/<minst_…>/deployments/<mdep_…>` — so pull the most specific ID out of the path and run `ravion describe <id>`; never search for or open the URL. `describe` tells you what the resource is and which commands apply.
 
 Two independent tracks of change, which is the key mental model:
 

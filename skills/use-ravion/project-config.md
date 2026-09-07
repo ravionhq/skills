@@ -73,7 +73,7 @@ environments:
     moduleInstances: [] # same module shape as production, usually smaller sizes
 ```
 
-Adding a database to an existing environment means adding a module instance to that environment's list, then applying scoped to it: `--environment-given-id staging --module-given-id database`.
+Adding a database to an existing environment means adding a module instance to that environment's list, then applying scoped to it: `--environment-given-id staging --module-given-id database`. Changing one existing module (a version bump, an input) is the same loop: `config pull`, edit that module's entry, `config apply --module-instance-id <minst_…>` — the `minst_` ID is in the dashboard URL the user pasted.
 
 ## Approval rules
 
