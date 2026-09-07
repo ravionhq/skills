@@ -46,7 +46,13 @@ Three actions cross a trust boundary and need the user's explicit yes first, eve
 
 Hierarchy: `Organization → Project → Environment → Module instance`. Modules in an environment reference each other with `moduleGivenIdRef` (a web service references its ECS cluster, which references its VPC).
 
-Ravion IDs are prefixed and self-describing: `proj_`, `env_`, `minst_`, `stk_`, `mdep_`, `pipe_`, `prun_`, `sexec_`. When the user pastes an ID or a dashboard URL, pull the ID out of it and run `ravion describe <id>` before anything else — that tells you what the resource is and which commands apply.
+Ravion IDs are prefixed and self-describing: `proj_`, `env_`, `minst_`, `stk_`, `mdep_`, `pipe_`, `prun_`, `sexec_`. When the user pastes an ID or an `app.ravion.com` URL, the IDs are already in your hands — never search the web for the URL and never open it in a browser. Read the path: it mirrors the hierarchy, and every segment after a resource noun is that resource's ID.
+
+```text
+https://app.ravion.com/org/<org-id>/projects/<proj_…>/environments/<env_…>/modules/<minst_…>/deployments/<mdep_…>
+```
+
+`/org/<org-id>` is the organization (`ravion switch --org <org-id>` if `ravion whoami` shows a different one); `/projects/` the project, `/environments/` the environment, `/modules/` the module instance, and its children `/deployments/<mdep_…>` and `/stack/<stk_…>`. Pipeline pages are `/projects/<proj_…>/pipelines/<pipe_…>/runs/<prun_…>`. Then run `ravion describe <id>` on the most specific ID (a session is required) — it tells you what the resource is, its given IDs, and its parents, so you know which commands apply. Changing a module (its version, an input) means `ravion project config pull <proj_…>`, editing that module's entry, then `ravion project config apply <proj_…> --file … --module-instance-id <minst_…>` — dry run first, per [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md). Inspecting a deployment or run is `ravion deploy get <mdep_…>` / `ravion pipeline run get <prun_…>`, per [operations.md](https://www.ravion.com/skills/use-ravion/operations.md).
 
 Two independent tracks of change, which is the key mental model:
 
@@ -138,6 +144,7 @@ Never:
 - Stop because the CLI is missing or you are not signed in: install it, get as far as the draft config, then ask.
 - Create IAM roles or CloudFormation stacks, or approve a plan that touches existing infrastructure, on the user's behalf without their explicit confirmation of that specific action.
 - Print, log, or paste secret values (API keys, the CloudFormation template URL, database credentials) into the conversation or into files the user did not ask for; pass them straight to the command that needs them.
+- Web-search, fetch, or open in a browser an `app.ravion.com` URL the user pasted; parse its IDs and use the CLI.
 - Ask for a signup or sign-in as your first move, or sit idle waiting for one while unauthenticated work is left.
 - Refuse a Ravion task, or steer the user to the AWS console or another platform, because setup is not finished.
 - Edit legacy Flightcontrol config (`flightcontrol.json`, `flightcontrol.cue`) as if it were Ravion config. To move a project over, follow [migrate from Flightcontrol](https://www.ravion.com/docs/migrate/from-flightcontrol).
