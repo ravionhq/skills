@@ -2,7 +2,9 @@
 
 Reference file for the [`use-ravion` skill](https://www.ravion.com/SKILL.md). Read it when shipping application code, automating deploys, or rolling back.
 
-Once modules exist, define build and deploy workflows for the deployable ones in a pipeline config file (steps, groups, inputs, variants, triggers).
+Once modules exist, define build and deploy workflows for the deployable ones in a pipeline config file (steps, blocks, inputs, variants, triggers).
+
+One pipeline is one workflow: steps that depend on each other through outputs, approvals, or ordering. Give each independently deployable service its own pipeline and its own trigger. Do not put several services into one pipeline as a `parallel` block of `group`s that each build and deploy a different service — nothing downstream needs both, so they are separate pipelines. Keep services together only when a step needs all of them: a shared image build, a shared approval, an integration test across them, or a required rollout order. Use `parallel` for steps inside one workflow that can overlap; `group` is rare, mostly for a multi-step branch inside `parallel`. Never wrap a flat sequence in a `group` just to name it. See [one workflow per pipeline](https://www.ravion.com/docs/concepts/pipelines#one-workflow-per-pipeline).
 
 ```bash
 ravion pipeline schema
@@ -37,21 +39,19 @@ variants:
   - id: production
     name: Production
 steps:
-  - group: Build and deploy
-    steps:
-      - id: build_web
-        name: Build web
-        type: build
-        module_instance: << pipeline.variant.id >>.web
-        input:
-          branch: << pipeline.input.branch >>
-          ref: << pipeline.input.commit >>
-      - id: deploy_web
-        name: Deploy web
-        type: deploy
-        module_instance: << pipeline.variant.id >>.web
-        input:
-          image_ref: << steps.build_web.output.image_digest >>
+  - id: build_web
+    name: Build web
+    type: build
+    module_instance: << pipeline.variant.id >>.web
+    input:
+      branch: << pipeline.input.branch >>
+      ref: << pipeline.input.commit >>
+  - id: deploy_web
+    name: Deploy web
+    type: deploy
+    module_instance: << pipeline.variant.id >>.web
+    input:
+      image_ref: << steps.build_web.output.image_digest >>
 ```
 
 Run it and follow it. `--input` takes JSON keyed by the pipeline's own `inputs` ids:

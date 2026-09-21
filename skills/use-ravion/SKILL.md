@@ -19,7 +19,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.2.0"
+  version: "2.3.0"
   homepage: "https://www.ravion.com/docs"
 ---
 
@@ -135,6 +135,7 @@ Never:
 - Poll `ravion pipeline run get` or `ravion deploy get` in a loop.
 - Use `--autoapprove` for a change that touches existing infrastructure.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
+- Pack independently deployable services into one pipeline as parallel `group`s. One pipeline is one workflow; unrelated services get their own pipelines (see [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md)).
 - Stop because the CLI is missing or you are not signed in: install it, get as far as the draft config, then ask.
 - Create IAM roles or CloudFormation stacks, or approve a plan that touches existing infrastructure, on the user's behalf without their explicit confirmation of that specific action.
 - Print, log, or paste secret values (API keys, the CloudFormation template URL, database credentials) into the conversation or into files the user did not ask for; pass them straight to the command that needs them.
