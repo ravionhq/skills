@@ -21,3 +21,5 @@ For a failed deploy: `ravion deploy get <id>` → the module's CloudWatch logs.
 A stuck Terraform state lock is [documented here](https://www.ravion.com/docs/troubleshooting/stuck-terraform-state-lock); `ravion stack get-lock` and `ravion stack unlock` handle it.
 
 Never run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
+
+When you report what you found — the failing run, the step whose logs you read, the deploy that is stuck — link each ID as `[<id>](https://app.ravion.com/go/<id>)` so the user can open it in the dashboard.

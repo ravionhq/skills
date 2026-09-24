@@ -19,7 +19,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.3.0"
+  version: "2.4.0"
   homepage: "https://www.ravion.com/docs"
 ---
 
@@ -47,6 +47,8 @@ Three actions cross a trust boundary and need the user's explicit yes first, eve
 Hierarchy: `Organization → Project → Environment → Module instance`. Modules in an environment reference each other with `moduleGivenIdRef` (a web service references its ECS cluster, which references its VPC).
 
 Ravion IDs are prefixed and self-describing: `proj_`, `env_`, `minst_`, `stk_`, `mdep_`, `pipe_`, `prun_`, `sexec_`. An `app.ravion.com` URL is just these IDs in hierarchy order — `/org/<org-id>/projects/<proj_…>/environments/<env_…>/modules/<minst_…>/deployments/<mdep_…>` — so pull the most specific ID out of the path and run `ravion describe <id>`; never search for or open the URL. `describe` tells you what the resource is and which commands apply.
+
+Every ID also resolves at `https://app.ravion.com/go/<id>`, which redirects to that resource's dashboard page. Whenever you show the user an ID — a run you started, a deploy you are watching, a module you created, a failure you are reporting — write it as a Markdown link, `[prun_3GnVYOJUpc68VxNmvJGPzZjKuJ](https://app.ravion.com/go/prun_3GnVYOJUpc68VxNmvJGPzZjKuJ)`, so they can click through instead of hunting for it. Bare IDs are for commands, not for the user.
 
 Two independent tracks of change, which is the key mental model:
 
@@ -126,6 +128,7 @@ Always:
 - Ask before production-impacting changes: public access, deletion protection, backup retention, capacity, region, networking exposure.
 - Get an explicit yes before anything that changes the user's AWS account outside a Ravion stack: creating or updating the connection CloudFormation stack, or anything else with `aws` that writes.
 - Use `wait --watch` to follow runs and deploys.
+- Link every ID you show the user as `[<id>](https://app.ravion.com/go/<id>)`.
 
 Never:
 
