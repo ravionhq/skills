@@ -19,7 +19,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.4.0"
+  version: "2.5.0"
   homepage: "https://www.ravion.com/docs"
 ---
 
@@ -123,6 +123,7 @@ Always:
 
 - Generate config files with `ravion project create --file` or `ravion project config pull --file`, then edit them. Without a session, draft from `ravion project config schema` plus the catalog pages, and reconcile with the generated file once you have one.
 - Check `ravion project config schema` and `ravion module schema <type>` before writing module inputs. `module schema` needs a session; until then use the module's catalog page.
+- When a value comes from another Ravion module, use a module output reference such as `<< modules.database.output.host >>`, never copy-paste its resolved value. Keep `moduleGivenIdRef` for typed module inputs; see [output references](https://www.ravion.com/skills/use-ravion/project-config.md#module-output-references) for addresses, types, and secrets.
 - Dry run every change, and show the user the planned diff before applying.
 - Preserve existing IDs, `givenId` values, module versions, and links you did not intend to change.
 - Ask before production-impacting changes: public access, deletion protection, backup retention, capacity, region, networking exposure.

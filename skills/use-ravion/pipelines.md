@@ -54,6 +54,8 @@ steps:
       image_ref: << steps.build_web.output.image_digest >>
 ```
 
+When pipeline config needs a module output, reference it rather than pasting its resolved value: `<< environments.production.modules.web.output.ecr_repository_arn >>`, or `<< projects.shared.environments.production.modules.web.output.ecr_repository_arn >>` across projects. Verify the output key on the producer. Bare `modules.<module>.output.<key>` references are invalid in pipelines because a pipeline is not tied to one environment. See [module outputs in pipeline templating](https://www.ravion.com/docs/pipelines/templating#module-outputs).
+
 Run it and follow it. `--input` takes JSON keyed by the pipeline's own `inputs` ids:
 
 ```bash

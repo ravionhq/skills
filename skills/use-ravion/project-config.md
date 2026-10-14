@@ -31,7 +31,7 @@ A typical containerized web app is `rvn-aws-network` → `rvn-ecs-cluster` → `
 
 Every environment the user talks about (`production`, `staging`, `preview`) is its own entry under `environments`, and `--environment-given-id staging` targets one of them. Modules wire together by `moduleGivenIdRef` — `{moduleGivenIdRef: "module"}` in the same environment, `"environment.module"` across environments, `"project.environment.module"` across projects.
 
-A database module takes `network: {moduleGivenIdRef: network}`, the same network the cluster uses. The service does **not** get a typed reference to it: `rvn-ecs-web` reads database credentials through runtime `secrets` (`{name, value_from}` pointing at Secrets Manager or SSM), so create the secret from the database outputs and pass it there. Read `ravion module schema rvn-rds` and `ravion module schema rvn-ecs-web` before wiring either side.
+A database module takes `network: {moduleGivenIdRef: network}`, the same network the cluster uses. The service does **not** get a typed reference to it: use output references for non-sensitive database connection values and runtime `secrets` (`{name, value_from}` pointing at Secrets Manager or SSM) for credentials. Reference an exported secret ARN or name, never the secret value. Read `ravion module schema rvn-rds` and `ravion module schema rvn-ecs-web` before wiring either side.
 
 ```yaml
 project:
@@ -74,6 +74,30 @@ environments:
 ```
 
 Adding a database to an existing environment means adding a module instance to that environment's list, then applying scoped to it: `--environment-given-id staging --module-given-id database`. Changing one existing module (a version bump, an input) is the same loop: `config pull`, edit that module's entry, `config apply --module-instance-id <minst_…>` — the `minst_` ID is in the dashboard URL the user pasted.
+
+## Module output references
+
+When an input needs a value produced by another Ravion module, store a `<< ... >>` output reference, not the current value copied from the CLI, dashboard, or Terraform output. This keeps the dependency tracked and resolves the value from the producer's last successful apply when the consumer's stack runs. Inspect the producer's outputs and the consumer's schema first; never guess an output key. Keep `moduleGivenIdRef` where the schema expects a typed module reference.
+
+Use the producer's `givenId`, not its `minst_...` ID:
+
+| Producer | Reference |
+| --- | --- |
+| Same environment | `<< modules.database.output.host >>` |
+| Another environment in this project | `<< environments.production.modules.database.output.host >>` |
+| Another project in this organization | `<< projects.shared.environments.production.modules.database.output.host >>` |
+
+For example, if the producer exports these keys and the consumer accepts these inputs:
+
+```yaml
+input:
+  vpc_id: << modules.network.output.vpc_id >>
+  subnet_ids: << modules.network.output.private_subnet_ids >>
+```
+
+A single template block preserves the output's type, including arrays, numbers, and booleans. Do not stringify or paste those values. Sensitive outputs cannot be referenced: wire a non-sensitive secret ARN or name into the consumer's secret configuration instead. Literal values are appropriate for user-supplied constants or resources managed outside Ravion, not copies of module outputs.
+
+Preserve references returned by `ravion project config pull`. A new producer may not have outputs yet; keep the reference rather than replacing it with a placeholder. `config apply` orders producer stack runs before consumers. Run the usual dry run to check the references and review the resolved values when available. See [output references](https://www.ravion.com/docs/modules/output-references).
 
 ## Approval rules
 
