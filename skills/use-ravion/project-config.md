@@ -9,7 +9,7 @@ ravion project config schema                     # 1. field-level schema for the
 ravion module definition list                    # 2. available module types
 ravion module schema <module-type> [version]     # 3. inputs for each module you touch
 ravion project config apply <project-id> --file ravion.yaml --dry-run   # 4. preview
-ravion project config apply <project-id> --file ravion.yaml             # 5. apply
+ravion project config apply <project-id> --file ravion.yaml             # 5. apply (add --autoapprove=false to review each plan)
 ```
 
 Generate the file with the CLI so it carries the current header, comments, and links — never hand-write it from memory:
@@ -101,14 +101,23 @@ Preserve references returned by `ravion project config pull`. A new producer may
 
 ## Approval rules
 
-Creating new infrastructure can go straight through with `--autoapprove`, scoped to what you are creating so an unrelated change cannot ride along:
+Files written by `ravion project create --file` and `ravion project config pull` start with `autoapprove: true`. `config apply` and the Ravion GitHub App both read it: a stack run whose Terraform plan only creates or updates resources applies right away, and a run whose plan destroys or replaces resources still waits for approval. The CLI's `--autoapprove` flag overrides the file in both directions.
+
+Creating new infrastructure can go straight through, scoped to what you are creating so an unrelated change cannot ride along. Add `--autoapprove` if the file does not set `autoapprove: true`:
 
 ```bash
-ravion project config apply <project-id> --file ravion.yaml --autoapprove \
+ravion project config apply <project-id> --file ravion.yaml \
   --environment-given-id <environment> --module-given-id <new-module>
 ```
 
-Omit `--autoapprove` when the change modifies, replaces, or removes existing infrastructure, so a human reviews each Terraform plan first. Removing a module instance plans a destroy and waits for manual approval.
+Pass `--autoapprove=false` when the change modifies, replaces, or removes existing infrastructure, so every stack run waits and the user reviews each Terraform plan first. Without the flag, the file's `autoapprove: true` applies an in-place update unreviewed:
+
+```bash
+ravion project config apply <project-id> --file ravion.yaml --autoapprove=false \
+  --module-instance-id <minst_…>
+```
+
+Removing a module instance plans a destroy, which waits for approval either way. Leave the file's `autoapprove` value as you found it unless the user asks: it also decides whether changes merged through the GitHub App apply without review. Setting it to `false`, or removing it, makes every run wait.
 
 Pass `--description "<PR or commit link>"` to label every stack run the apply creates. Narrow the target with `--environment-given-id`, `--module-given-id`, `--environment-id`, or `--module-instance-id`.
 
@@ -117,17 +126,19 @@ Pass `--description "<PR or commit link>"` to label every stack run the apply cr
 Every apply prints a `PIPELINE_RUN_ID` per stack run it started, in dependency order, plus the exact wait command. Use `wait --watch`, never a polling loop:
 
 ```bash
-# Without --autoapprove: wait for the gate, read the plan, approve, wait for the apply
+# Runs that wait (--autoapprove=false, or a destroy/replace plan): wait for the gate, read the plan, approve, wait for the apply
 ravion pipeline run wait <pipeline-run-id> --until PENDING_APPROVAL --watch
 ravion pipeline run get-plan <pipeline-run-id>
 ravion pipeline run approve <pipeline-run-id>
 ravion pipeline run wait <pipeline-run-id> --watch
 
-# With --autoapprove
+# Autoapproved runs go straight through
 ravion pipeline run wait <pipeline-run-id> --watch --timeout 30m
 ravion pipeline run get-apply <pipeline-run-id>
 ```
 
 A non-zero exit from `wait` means the run failed, was cancelled, or was rolled back. Read the plan and the step logs before retrying — see [operations](https://www.ravion.com/skills/use-ravion/operations.md).
+
+Commit the file when you are done: in a repository connected through the Ravion GitHub App, later changes to it are planned on pull requests and applied on merge (see [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#apply-config-on-merge)).
 
 Full reference: [project config file](https://www.ravion.com/docs/config-as-code/project-config-file). Compact machine-readable schema: `https://api.ravion.com/projects/config/schema.md`.

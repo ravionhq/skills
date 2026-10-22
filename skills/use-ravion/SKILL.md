@@ -19,7 +19,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.5.0"
+  version: "2.6.0"
   homepage: "https://www.ravion.com/docs"
 ---
 
@@ -65,7 +65,7 @@ Read the one file you need, when you need it. Each is a URL you can fetch; an in
 | Add, change, or remove infrastructure                             | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md) |
 | Build and ship code, automate deploys, roll back                  | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)           |
 | Inspect state, debug a failure, read logs                         | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)         |
-| Install the CLI, sign in, connect AWS or Git, CI                  | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
+| Install the CLI, sign in, connect AWS or Git, config on merge    | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
 | Anything else — custom domains, secrets, quotas, a specific error | Search the docs, per [Look things up](#look-things-up) below                                        |
 
 ## Preflight
@@ -107,8 +107,9 @@ Golden path for "deploy this repo to AWS with Ravion". Do the work yourself — 
 4. **Write the config**, following [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md): generate the file with the CLI when you have a session, otherwise draft it from the public schema endpoints and reconcile it with the generated file later. Read the schema of every module you touch.
 5. **Ask for what only the user can give**, in one message: sign-up or sign-in, the AWS account given ID and region, the repository slug, and any of domain, instance sizes, and ports you could not read from the repo with high confidence. Show them the draft config with the question.
 6. **Create the project and dry run.** With a session, create it with `--file`, fold your draft into the generated file, verify every module input against `ravion module schema`, then dry run.
-7. **Apply.** Creating new infrastructure can use `--autoapprove`, scoped to what you are creating with `--module-given-id` or `--environment-given-id`; anything that touches existing infrastructure needs a reviewed plan.
+7. **Apply.** The generated file sets `autoapprove: true`, so a plain apply lets plans without destructive changes apply right away. That is fine for creating new infrastructure, scoped to what you are creating with `--module-given-id` or `--environment-given-id`; anything that touches existing infrastructure needs `--autoapprove=false` and a reviewed plan.
 8. **Add a build and deploy pipeline** per [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md) so code ships on every push, then verify the deploy and hand back the service URL. Point a custom domain with [the custom domains guide](https://www.ravion.com/docs/guides/custom-domains).
+9. **Commit the config files.** Once `ravion.yaml` (and any `ravion-pipeline.yaml`) is committed in a repository connected through the Ravion GitHub App, the app plans config changes on pull requests and applies them on merge. Do not write a GitHub Actions workflow for this; see [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#apply-config-on-merge).
 
 ## Look things up
 
@@ -137,7 +138,9 @@ Never:
 - Copy module inputs from unrelated files or examples.
 - Apply without a successful dry run.
 - Poll `ravion pipeline run get` or `ravion deploy get` in a loop.
-- Use `--autoapprove` for a change that touches existing infrastructure.
+- Apply a change that touches existing infrastructure without `--autoapprove=false`. The file's `autoapprove: true` would apply its plan before the user sees it.
+- Write a GitHub Actions workflow, or ask for a `RAVION_API_KEY` repository secret, to plan or apply config files in GitHub. The Ravion GitHub App does that.
+- Remove or flip the file's `autoapprove` field without asking. It decides whether merged changes apply without review.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
 - Pack independently deployable services into one pipeline as parallel `group`s. One pipeline is one workflow; unrelated services get their own pipelines (see [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md)).
 - Stop because the CLI is missing or you are not signed in: install it, get as far as the draft config, then ask.
