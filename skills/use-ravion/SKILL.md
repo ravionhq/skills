@@ -139,7 +139,7 @@ Never:
 - Apply without a successful dry run.
 - Poll `ravion pipeline run get` or `ravion deploy get` in a loop.
 - Apply a change that touches existing infrastructure without `--autoapprove=false`. The file's `autoapprove: true` would apply its plan before the user sees it.
-- Write a GitHub Actions workflow, or ask for a `RAVION_API_KEY` repository secret, to plan or apply config files in GitHub. The Ravion GitHub App does that.
+- Write a GitHub Actions workflow, or ask for a `RAVION_API_KEY` repository secret, to plan or apply config files in a repository connected through the Ravion GitHub App. The app does that; the CLI fallback in [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#apply-config-on-merge) is only for repositories without it.
 - Remove or flip the file's `autoapprove` field without asking. It decides whether merged changes apply without review.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
 - Pack independently deployable services into one pipeline as parallel `group`s. One pipeline is one workflow; unrelated services get their own pipelines (see [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md)).

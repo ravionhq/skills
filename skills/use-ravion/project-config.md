@@ -9,7 +9,7 @@ ravion project config schema                     # 1. field-level schema for the
 ravion module definition list                    # 2. available module types
 ravion module schema <module-type> [version]     # 3. inputs for each module you touch
 ravion project config apply <project-id> --file ravion.yaml --dry-run   # 4. preview
-ravion project config apply <project-id> --file ravion.yaml             # 5. apply (add --autoapprove=false to review each plan)
+ravion project config apply <project-id> --file ravion.yaml --autoapprove=false   # 5. apply; each plan waits for review (see Approval rules)
 ```
 
 Generate the file with the CLI so it carries the current header, comments, and links — never hand-write it from memory:
@@ -73,7 +73,7 @@ environments:
     moduleInstances: [] # same module shape as production, usually smaller sizes
 ```
 
-Adding a database to an existing environment means adding a module instance to that environment's list, then applying scoped to it: `--environment-given-id staging --module-given-id database`. Changing one existing module (a version bump, an input) is the same loop: `config pull`, edit that module's entry, `config apply --module-instance-id <minst_…>` — the `minst_` ID is in the dashboard URL the user pasted.
+Adding a database to an existing environment means adding a module instance to that environment's list, then applying scoped to it: `--environment-given-id staging --module-given-id database`. Changing one existing module (a version bump, an input) is the same loop: `config pull`, edit that module's entry, `config apply --autoapprove=false --module-instance-id <minst_…>` — the `minst_` ID is in the dashboard URL the user pasted.
 
 ## Module output references
 
@@ -101,7 +101,7 @@ Preserve references returned by `ravion project config pull`. A new producer may
 
 ## Approval rules
 
-Files written by `ravion project create --file` and `ravion project config pull` start with `autoapprove: true`. `config apply` and the Ravion GitHub App both read it: a stack run whose Terraform plan only creates or updates resources applies right away, and a run whose plan destroys or replaces resources still waits for approval. The CLI's `--autoapprove` flag overrides the file in both directions.
+Files written by `ravion project create --file` and `ravion project config pull` start with `autoapprove: true`. `config apply` and the Ravion GitHub App both read it: a stack run whose Terraform plan only creates or updates resources applies right away, and a run whose plan destroys or replaces resources still waits for approval. The CLI's `--autoapprove` flag overrides the file in both directions. This needs CLI 1.18.6 or later: check `ravion --version` and upgrade an older CLI (per [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#install-the-cli)) before relying on it.
 
 Creating new infrastructure can go straight through, scoped to what you are creating so an unrelated change cannot ride along. Add `--autoapprove` if the file does not set `autoapprove: true`:
 
