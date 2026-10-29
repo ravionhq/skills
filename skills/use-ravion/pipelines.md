@@ -83,9 +83,12 @@ The `--inputs` keys come from the module's deploy manager — check `ravion depl
 
 ```bash
 ravion module list --project-id <project-id>            # find <module-instance-id>
-ravion deploy rollback-candidates <module-instance-id>   # earlier deploys you can return to
-ravion deploy rollback <deployment-id>
-ravion deploy wait <deployment-id> --watch
+ravion deploy list --module-instance-id <module-instance-id>  # find the current deployment ID (mdep_...)
+ravion deploy rollback-candidates <current-deployment-id>     # earlier deploys you can return to
+ravion deploy rollback <candidate-deployment-id>              # creates a new rollback deployment
+ravion deploy wait <new-deployment-id> --watch                # use the ID returned by rollback
 ```
+
+Both rollback commands take deployment IDs (`mdep_...`), not module instance IDs (`minst_...`). Choose a target from `rollback-candidates`, then wait on the new deployment returned by `rollback`, not the target deployment.
 
 Reference: [pipeline config file](https://www.ravion.com/docs/config-as-code/pipeline-config-file), [step types](https://www.ravion.com/docs/pipelines/step-types), [templating](https://www.ravion.com/docs/pipelines/templating).

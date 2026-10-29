@@ -19,7 +19,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.6.0"
+  version: "2.6.1"
   homepage: "https://www.ravion.com/docs"
 ---
 
