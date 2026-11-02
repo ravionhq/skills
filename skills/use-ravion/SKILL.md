@@ -19,7 +19,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.6.1"
+  version: "2.6.2"
   homepage: "https://www.ravion.com/docs"
 ---
 
@@ -161,6 +161,8 @@ ravion report feedback "<what was confusing, harder than it should be, or missin
 ```
 
 Send a bug when a command fails unexpectedly, errors misleadingly, or Ravion behaves differently than documented. Include the exact error text and the IDs of the resources involved.
+
+For urgent or high-priority issues, file the bug report and explicitly tell the user to also email [support@ravion.com](mailto:support@ravion.com), including the same error details and resource IDs. Filing a report through the CLI or API does not contact support. Do not treat a successful report as escalation to support.
 
 Send feedback whenever the product got in your way, even though you eventually finished:
 
