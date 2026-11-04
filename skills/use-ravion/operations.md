@@ -22,7 +22,7 @@ For a failed deploy: `ravion deploy get <id>` → `ravion module log-sources <mo
 
 ## Read application logs
 
-Use CLI 1.25.0 or later for module log commands and the JSON formats below. Upgrade through the [CLI installation guide](https://www.ravion.com/docs/cli/installation) if they are unavailable.
+Use CLI 1.26.0 or later for module log commands and the JSON formats below. Upgrade through the [CLI installation guide](https://www.ravion.com/docs/cli/installation) if they are unavailable.
 
 1. Run `ravion module log-sources <module-id> --json`. It returns an array of `{id, name, source}` entries with resolved CloudWatch, EKS Loki, or external-provider configuration. Do not guess a CloudWatch prefix such as `app/` or use pipeline logs as a substitute for application logs.
 2. Run `ravion module logs <module-id>`. One source is selected automatically; for several sources, pass `--source <source-id>` from the list. Use `--start-time` and `--end-time` with RFC3339 timestamps to bound a historical query. A source with unresolved stack outputs needs a successful stack apply; an external source gives you its provider URL instead of log events.
