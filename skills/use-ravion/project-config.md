@@ -66,7 +66,7 @@ environments:
             moduleGivenIdRef: cluster
           name: demo-production-web
           build_source: railpack
-          source_repo: my-org/my-repo
+          source_repo: github.com/my-org/my-repo
           container_port: 3000
   - givenId: staging
     name: Staging
