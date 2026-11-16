@@ -170,7 +170,7 @@ Before filing a bug, rule out a fix that has already shipped:
 1. Upgrade the CLI to the latest release (`brew upgrade ravionhq/tap/ravion`, or rerun the installer per [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#install-the-cli)) and retry. `ravion report bug` refuses to file from an outdated CLI.
 2. If the failure involves a module, such as a failed Terraform plan or stack run, check `ravion module version list --type <module-type>` for a newer version and read its release notes. Bump that module's `version` in the config file, apply it scoped to that module with `--autoapprove=false` (per [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md)), and retry. Upgrading changes real infrastructure, so show the user the plan before it applies.
 
-File the bug only if it still happens on the latest CLI and module versions. Name those versions in the report.
+File the bug if it still happens on the latest CLI and module versions. If the module upgrade itself fails or the user declines it, report the original failure anyway. In every bug report, include the CLI and module versions in use, any target module version you tried, and any upgrade error.
 
 For urgent or high-priority issues, file the bug report and explicitly tell the user to also email [support@ravion.com](mailto:support@ravion.com), including the same error details and resource IDs. Filing a report through the CLI or API does not contact support. Do not treat a successful report as escalation to support.
 
