@@ -58,7 +58,7 @@ Two independent tracks of change, which is the key mental model:
 
 ## Route by intent
 
-Read the one file you need, when you need it. Each is a URL you can fetch; an installed copy of this skill has the same files next to it as `setup.md`, `project-config.md`, `pipelines.md`, `operations.md`, and `github-actions.md`.
+Read the one file you need, when you need it. Each is a URL you can fetch; an installed copy of this skill has the same files next to it as `setup.md`, `project-config.md`, `pipelines.md`, and `operations.md`.
 
 | The user wants                                                    | Read                                                                                                |
 | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -66,7 +66,7 @@ Read the one file you need, when you need it. Each is a URL you can fetch; an in
 | Add, change, or remove infrastructure                             | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md) |
 | Build and ship code, automate deploys, roll back                  | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)           |
 | Inspect state, debug a failure, read logs                         | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)         |
-| Run GitHub Actions jobs on Ravion runners, migrate `runs-on`      | [`skills/use-ravion/github-actions.md`](https://www.ravion.com/skills/use-ravion/github-actions.md) |
+| Run GitHub Actions jobs on Ravion runners, migrate `runs-on`      | [Migrate GitHub Actions workflows](https://www.ravion.com/docs/github-actions/migrate-workflows.md) |
 | Install the CLI, sign in, connect AWS or Git, config on merge    | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
 | Anything else — custom domains, secrets, quotas, a specific error | Search the docs, per [Look things up](#look-things-up) below                                        |
 
@@ -142,7 +142,7 @@ Never:
 - Poll `ravion pipeline run get` or `ravion deploy get` in a loop.
 - Apply a change that touches existing infrastructure without `--autoapprove=false`. The file's `autoapprove: true` would apply its plan before the user sees it.
 - Write a GitHub Actions workflow, or ask for a `RAVION_API_KEY` repository secret, to plan or apply config files in a repository connected through the Ravion GitHub App. The app does that; the CLI fallback in [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#apply-config-on-merge) is only for repositories without it.
-- Move GitHub Actions jobs to Ravion runners by changing only `runs-on`. Also swap vendor actions, set `clean: false` on checkout, and fix steps for a kept workspace; follow [github-actions.md](https://www.ravion.com/skills/use-ravion/github-actions.md).
+- Move GitHub Actions jobs to Ravion runners by changing only `runs-on`. Also swap vendor actions, set `clean: false` on checkout, and fix steps for a kept workspace; follow [Migrate GitHub Actions workflows](https://www.ravion.com/docs/github-actions/migrate-workflows.md).
 - Remove or flip the file's `autoapprove` field without asking. It decides whether merged changes apply without review.
 - Run `terraform apply` against a Ravion stack. Stacks change only through their pipelines.
 - Pack independently deployable services into one pipeline as parallel `group`s. One pipeline is one workflow; unrelated services get their own pipelines (see [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md)).

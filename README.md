@@ -10,7 +10,7 @@ Deploy and operate infrastructure on AWS with Ravion: connect an AWS account, cr
 
 Source: [`skills/use-ravion/SKILL.md`](skills/use-ravion/SKILL.md), mirrored from the hosted copy at [`https://www.ravion.com/SKILL.md`](https://www.ravion.com/SKILL.md).
 
-`SKILL.md` is a router: it carries the resource model, the deployment path, and the rules, then links to reference files the agent reads only when it needs them — [`setup.md`](skills/use-ravion/setup.md) (CLI, sign-in, AWS and Git connections, Docs MCP, CI), [`project-config.md`](skills/use-ravion/project-config.md), [`pipelines.md`](skills/use-ravion/pipelines.md), [`operations.md`](skills/use-ravion/operations.md), and [`github-actions.md`](skills/use-ravion/github-actions.md) (moving GitHub Actions jobs to Ravion runners). Installed copies ship those files next to `SKILL.md`; an agent that loaded only the hosted `SKILL.md` fetches them from `https://www.ravion.com/skills/use-ravion/`.
+`SKILL.md` is a router: it carries the resource model, the deployment path, and the rules, then links to reference files the agent reads only when it needs them — [`setup.md`](skills/use-ravion/setup.md) (CLI, sign-in, AWS and Git connections, Docs MCP, CI), [`project-config.md`](skills/use-ravion/project-config.md), [`pipelines.md`](skills/use-ravion/pipelines.md), and [`operations.md`](skills/use-ravion/operations.md). Installed copies ship those files next to `SKILL.md`; an agent that loaded only the hosted `SKILL.md` fetches them from `https://www.ravion.com/skills/use-ravion/`.
 
 Skills for Flightcontrol, Ravion's predecessor, live in [`ravionhq/flightcontrol-skills`](https://github.com/ravionhq/flightcontrol-skills).
 
