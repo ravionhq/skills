@@ -14,7 +14,7 @@ Moving a job takes many changes besides `runs-on`. The full list is [Migrate Git
 
 Follow the checklist in [Migrate GitHub Actions workflows](https://www.ravion.com/docs/github-actions/migrate-workflows.md#checklist) for every job in `.github/workflows`. The steps people most often miss:
 
-- Label every moved job `ravion/ee=<ee>/type=sandbox/cpu=auto/memory=auto/disk=auto/disk_cache=auto/interruptible=<true|false>/id=${{ github.run_id }}-${{ github.run_attempt }}-<workflow-file>-<job-id>`, plus matrix values or `${{ strategy.job-index }}` for matrix jobs.
+- Label every moved job `ravion/ee=<ee>/type=sandbox/cpu=auto/memory=auto/disk=auto/disk_cache=auto/interruptible=<true|false>/id=${{ github.run_id }}-${{ github.run_attempt }}-<workflow-file>-<job-id>`, plus `-${{ strategy.job-index }}` for matrix jobs and a caller-supplied input for reusable workflows called more than once in a run.
 - Set `interruptible=true` only when running the whole job twice is harmless. Jobs that publish, deploy or release, and every job in a workflow triggered by releases or tags, are not interruptible.
 - Swap vendor forks of standard actions for the standard action, and remove vendor cache, disk and builder setup, following the guide's tab for each runner the repository uses today. Leave the job alone when a vendor Docker builder can't be removed safely.
 - Add `clean: false` to `actions/checkout`, except in jobs that publish, deploy, release, use a GitHub `environment:`, or check for a clean tree.
