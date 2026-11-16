@@ -20,7 +20,7 @@ license: MIT
 allowed-tools: Bash(ravion:*), Bash(aws:*), Bash(brew:*), Bash(curl:*), Bash(npx:*), Bash(git:*), Bash(command:*), Bash(which:*)
 metadata:
   author: Ravion
-  version: "2.7.0"
+  version: "2.7.1"
   homepage: "https://www.ravion.com/docs"
 ---
 
@@ -164,6 +164,13 @@ ravion report feedback "<what was confusing, harder than it should be, or missin
 ```
 
 Send a bug when a command fails unexpectedly, errors misleadingly, or Ravion behaves differently than documented. Include the exact error text and the IDs of the resources involved.
+
+Before filing a bug, rule out a fix that has already shipped:
+
+1. Upgrade the CLI to the latest release (`brew upgrade ravionhq/tap/ravion`, or rerun the installer per [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#install-the-cli)) and retry. `ravion report bug` refuses to file from an outdated CLI.
+2. If the failure involves a module, such as a failed Terraform plan or stack run, check `ravion module version list --type <module-type>` for a newer version and read its release notes. Bump that module's `version` in the config file, apply it scoped to that module with `--autoapprove=false` (per [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md)), and retry. Upgrading changes real infrastructure, so show the user the plan before it applies.
+
+File the bug only if it still happens on the latest CLI and module versions. Name those versions in the report.
 
 For urgent or high-priority issues, file the bug report and explicitly tell the user to also email [support@ravion.com](mailto:support@ravion.com), including the same error details and resource IDs. Filing a report through the CLI or API does not contact support. Do not treat a successful report as escalation to support.
 
