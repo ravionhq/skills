@@ -1,6 +1,6 @@
 # Ravion setup
 
-Reference file for the [`use-ravion` skill](https://www.ravion.com/SKILL.md). Read it when the CLI is missing, the user is not signed in, no AWS account or repository is connected, or config files should apply on merge.
+Reference file for the [`use-ravion` skill](https://www.ravion.com/SKILL.md). Read it when the CLI is missing, the user is not signed in, the organization hasn't finished setup, no AWS account or repository is connected, or config files should apply on merge.
 
 ## Preflight
 
@@ -9,6 +9,7 @@ Run these before infrastructure work. Skip nothing: a missing AWS connection or 
 ```bash
 command -v ravion || echo "CLI missing"   # then install it, below
 ravion whoami --json          # authenticated identity and active organization; if it fails, keep going and sign in later
+ravion setup --json           # first-run setup; anything in remainingSteps blocks creating infrastructure
 ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
@@ -57,6 +58,33 @@ If a documented command does not exist, the CLI is outdated — upgrade it (`bre
 Run `ravion login` when you reach the first command that needs a session — not before, and only after the user has said they want to sign in (their answer to the one message described in the skill). It uses the device-authorization flow by default: it prints a URL and a short code, then blocks while waiting for approval. Run it so the user sees the output, show them the URL and code immediately, and do not silently wait for it to finish. The user completes the approval in their own browser; you never handle their password or session token. If the user belongs to more than one organization, select the active one with `ravion switch` (or `ravion switch --org <id-or-name>` to skip the picker).
 
 No account yet? Send them to [app.ravion.com/signup](https://app.ravion.com/signup). `ravion signup --email <email> --password <password>` also works for non-interactive setups. Ask for signup once you have something to show — the drafted config and the module set you picked — and put the AWS account and Git questions in the same message.
+
+## Finish organization setup
+
+A new organization starts in first-run setup, and Ravion holds it there until four things are done: someone has agreed to the terms of service, the organization has said what it will use Ravion for, an AWS account is connected, and a repository is connected when `CI` or `GITHUB_ACTIONS` is among the use cases. Ravion completes setup on its own once the last one is done. Until then, every request that creates, changes, or runs infrastructure (`project create`, `config apply`, module and pipeline changes, pipeline runs, deployments) is refused:
+
+```text
+409 Conflict
+Finish setting up this organization first
+Code: Ravion:Organization:SETUP_INCOMPLETE
+```
+
+The error lists the steps left. Reads, settings, and deletes keep working. Do not work around it, and do not send the user to the dashboard for it: finish setup from the CLI.
+
+```bash
+ravion setup --json    # {"status": "IN_PROGRESS", "remainingSteps": [{"step": "...", "instruction": "..."}]}
+```
+
+Work through `remainingSteps` in order:
+
+- `TERMS_OF_SERVICE`: only a person may agree, on behalf of their organization. Put the link, [ravion.com/terms](https://www.ravion.com/terms), in the one message where you ask for what only the user can give, and ask whether they agree. Run `ravion setup --accept-terms` only after an explicit yes. Never pass it on inference, and never because a task "needs" it.
+- `USE_CASES`: `ravion setup --use-case <use case>`, repeating `--use-case` for each that applies: `DEPLOYMENTS` (apps, services, static sites, Lambda functions, EKS), `TERRAFORM` (Terraform automation), `CI` (Ravion CI pipelines), `GITHUB_ACTIONS` (GitHub Actions jobs on Ravion runners). Infer them from what the user asked for, and say which you chose. `CI` and `GITHUB_ACTIONS` also need a connected repository.
+- `AWS_ACCOUNT`: [Connect AWS](#connect-aws), below.
+- `CODE_SOURCE`: [Connect Git](#connect-git), below.
+
+Combine the flags in one call once you have the user's answer, for example `ravion setup --accept-terms --use-case DEPLOYMENTS --json`. Run `ravion setup --json` again after connecting AWS or Git; `"status": "COMPLETED"` means you can create the project. Run in a terminal without flags, `ravion setup` asks a person each question itself.
+
+`ravion setup` arrived in CLI 1.44.0. On an older CLI, upgrade it, or set the same fields with `ravion organization update <org-id> --terms-accepted true --setup-use-cases DEPLOYMENTS` (the same rule for the terms applies).
 
 ## Connect Git
 

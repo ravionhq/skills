@@ -34,7 +34,7 @@ Drive the work; do not hand it back. The user's request to deploy or operate wit
 
 No account or no session is not a stopping point either: get as far as you can without one. Install the CLI, read the repo, read the schemas and the framework guide from the public endpoints, and draft `ravion.yaml` — then ask the user to sign up or sign in, with the draft already in hand.
 
-Three actions cross a trust boundary and need the user's explicit yes first, every time: signing in (they approve the device code), connecting an AWS account (a CloudFormation stack that creates an IAM role in their account — confirm the account ID from `aws sts get-caller-identity` before creating it), and applying a plan that changes existing infrastructure. Everything else, do yourself; see [setup.md](https://www.ravion.com/skills/use-ravion/setup.md).
+Four actions cross a trust boundary and need the user's explicit yes first, every time: signing in (they approve the device code), agreeing to Ravion's [terms of service](https://www.ravion.com/terms) for their organization (`ravion setup --accept-terms`), connecting an AWS account (a CloudFormation stack that creates an IAM role in their account — confirm the account ID from `aws sts get-caller-identity` before creating it), and applying a plan that changes existing infrastructure. Everything else, do yourself; see [setup.md](https://www.ravion.com/skills/use-ravion/setup.md).
 
 ## Resource model
 
@@ -60,15 +60,15 @@ Two independent tracks of change, which is the key mental model:
 
 Read the one file you need, when you need it. Each is a URL you can fetch; an installed copy of this skill has the same files next to it as `setup.md`, `project-config.md`, `pipelines.md`, and `operations.md`.
 
-| The user wants                                                    | Read                                                                                                |
-| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| "Deploy this project/repo to AWS with Ravion"                     | [Deploy this project](#deploy-this-project) below, which pulls in the files as it goes              |
-| Add, change, or remove infrastructure                             | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md) |
-| Build and ship code, automate deploys, roll back                  | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)           |
-| Inspect state, debug a failure, read logs                         | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)         |
-| Run GitHub Actions jobs on Ravion runners, migrate `runs-on`      | [Migrate GitHub Actions workflows](https://www.ravion.com/docs/github-actions/migrate-workflows.md) |
-| Install the CLI, sign in, connect AWS or Git, config on merge    | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
-| Anything else — custom domains, secrets, quotas, a specific error | Search the docs, per [Look things up](#look-things-up) below                                        |
+| The user wants                                                              | Read                                                                                                |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| "Deploy this project/repo to AWS with Ravion"                               | [Deploy this project](#deploy-this-project) below, which pulls in the files as it goes              |
+| Add, change, or remove infrastructure                                       | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md) |
+| Build and ship code, automate deploys, roll back                            | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)           |
+| Inspect state, debug a failure, read logs                                   | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)         |
+| Run GitHub Actions jobs on Ravion runners, migrate `runs-on`                | [Migrate GitHub Actions workflows](https://www.ravion.com/docs/github-actions/migrate-workflows.md) |
+| Install the CLI, sign in, finish setup, connect AWS or Git, config on merge | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
+| Anything else — custom domains, secrets, quotas, a specific error           | Search the docs, per [Look things up](#look-things-up) below                                        |
 
 ## Preflight
 
@@ -83,6 +83,7 @@ command -v ravion || echo "CLI missing"
 ravion whoami --json
 
 # 3. With a session, see what exists already.
+ravion setup --json           # first-run setup: what the organization needs before it can create infrastructure
 ravion aws account list       # must have at least one connected AWS account
 ravion code-source list       # connected repositories (skip if deploying a prebuilt image)
 ravion project list           # existing projects
@@ -93,9 +94,11 @@ ravion project list           # existing projects
 aws sts get-caller-identity
 ```
 
+A new organization starts in first-run setup. Until `ravion setup` reports `COMPLETED`, Ravion refuses every request that creates, changes, or runs infrastructure (projects, config apply, modules, pipelines, runs, deployments) with `409 Ravion:Organization:SETUP_INCOMPLETE`; reads still work. Finish setup from the CLI per [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#finish-organization-setup) instead of sending the user to the dashboard.
+
 No session yet? Do not ask for one and wait. Everything up to the first write is unauthenticated: reading the repo, the framework guide, `ravion project config schema`, `ravion pipeline schema`, `ravion module definition schema`, and the module catalog pages — enough to draft `ravion.yaml` and `ravion-pipeline.yaml` in full. Work through steps 2–4 of [Deploy this project](#deploy-this-project) first, then ask, so the user signs up against a finished draft instead of an empty prompt. `ravion signup --email <email> --password <password>` is non-interactive when they want that; otherwise [app.ravion.com/signup](https://app.ravion.com/signup), then `ravion login`.
 
-Only three things genuinely need the user: signing up or approving the sign-in, confirming which AWS account to use, and connecting Git in a browser. Collect those in **one** message — the signup link or sign-in code, the AWS account ID and region, the `ravion git connect` URL, the repository slug — instead of one round trip per gap. Everything else, do yourself, following [setup.md](https://www.ravion.com/skills/use-ravion/setup.md). Send the user to the AWS console flow when there are no AWS CLI credentials for the account they want, or when they prefer to create the IAM role themselves. Then keep working while they act.
+Only four things genuinely need the user: signing up or approving the sign-in, agreeing to the terms of service for their organization, confirming which AWS account to use, and connecting Git in a browser. Collect those in **one** message — the signup link or sign-in code, the terms link with what Ravion will be used for, the AWS account ID and region, the `ravion git connect` URL, the repository slug — instead of one round trip per gap. Everything else, do yourself, following [setup.md](https://www.ravion.com/skills/use-ravion/setup.md). Send the user to the AWS console flow when there are no AWS CLI credentials for the account they want, or when they prefer to create the IAM role themselves. Then keep working while they act.
 
 Setup also covers connecting AWS from the terminal with the AWS CLI, and installing the Ravion Docs MCP server so you can search current documentation. Install that server yourself.
 
@@ -107,8 +110,8 @@ Golden path for "deploy this repo to AWS with Ravion". Do the work yourself — 
 2. **Detect the app.** Read the manifest (`package.json`, `pyproject.toml`, `go.mod`, `Gemfile`, `Dockerfile`), the build and start commands, the listening port, and whether it is server-rendered or fully static. In a monorepo, find the app root.
 3. **Read the framework guide.** `https://www.ravion.com/docs/deploy/aws/<framework>` has a working `ravion.yaml` for Next.js, Astro, Django, Rails, Laravel, FastAPI, SvelteKit, Remix, Vite, and more — see [the index](https://www.ravion.com/docs/deploy/aws). Use it as the source of truth for that stack instead of inventing module inputs.
 4. **Write the config**, following [project-config.md](https://www.ravion.com/skills/use-ravion/project-config.md): generate the file with the CLI when you have a session, otherwise draft it from the public schema endpoints and reconcile it with the generated file later. Read the schema of every module you touch.
-5. **Ask for what only the user can give**, in one message: sign-up or sign-in, the AWS account given ID and region, the repository slug, and any of domain, instance sizes, and ports you could not read from the repo with high confidence. Show them the draft config with the question.
-6. **Create the project and dry run.** With a session, create it with `--file`, fold your draft into the generated file, verify every module input against `ravion module schema`, then dry run.
+5. **Ask for what only the user can give**, in one message: sign-up or sign-in, agreement to the terms of service if `ravion setup` still lists it, the AWS account given ID and region, the repository slug, and any of domain, instance sizes, and ports you could not read from the repo with high confidence. Show them the draft config with the question.
+6. **Finish setup, create the project, and dry run.** With a session, run `ravion setup` and finish what it lists (see [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#finish-organization-setup)); creating the project is refused until it reports `COMPLETED`. Then create it with `--file`, fold your draft into the generated file, verify every module input against `ravion module schema`, then dry run.
 7. **Apply.** The generated file sets `autoapprove: true`, so a plain apply lets plans without destructive changes apply right away. That is fine for creating new infrastructure, scoped to what you are creating with `--module-given-id` or `--environment-given-id`; anything that touches existing infrastructure needs `--autoapprove=false` and a reviewed plan.
 8. **Add a build and deploy pipeline** per [pipelines.md](https://www.ravion.com/skills/use-ravion/pipelines.md) so code ships on every push, then verify the deploy and hand back the service URL. Point a custom domain with [the custom domains guide](https://www.ravion.com/docs/guides/custom-domains).
 9. **Commit the config files.** Once `ravion.yaml` (and any `ravion-pipeline.yaml`) is committed in a repository connected through the Ravion GitHub App, the app plans config changes on pull requests and applies them on merge. Do not write a GitHub Actions workflow for this; see [setup.md](https://www.ravion.com/skills/use-ravion/setup.md#apply-config-on-merge).
