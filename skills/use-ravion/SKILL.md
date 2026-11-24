@@ -60,15 +60,16 @@ Two independent tracks of change, which is the key mental model:
 
 Read the one file you need, when you need it. Each is a URL you can fetch; an installed copy of this skill has the same files next to it as `setup.md`, `project-config.md`, `pipelines.md`, and `operations.md`.
 
-| The user wants                                                              | Read                                                                                                |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| "Deploy this project/repo to AWS with Ravion"                               | [Deploy this project](#deploy-this-project) below, which pulls in the files as it goes              |
-| Add, change, or remove infrastructure                                       | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md) |
-| Build and ship code, automate deploys, roll back                            | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)           |
-| Inspect state, debug a failure, read logs                                   | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)         |
-| Run GitHub Actions jobs on Ravion runners, migrate `runs-on`                | [Migrate GitHub Actions workflows](https://www.ravion.com/docs/github-actions/migrate-workflows.md) |
-| Install the CLI, sign in, finish setup, connect AWS or Git, config on merge | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                   |
-| Anything else — custom domains, secrets, quotas, a specific error           | Search the docs, per [Look things up](#look-things-up) below                                        |
+| The user wants                                                              | Read                                                                                                                       |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| "Deploy this project/repo to AWS with Ravion"                               | [Deploy this project](#deploy-this-project) below, which pulls in the files as it goes                                     |
+| Add, change, or remove infrastructure                                       | [`skills/use-ravion/project-config.md`](https://www.ravion.com/skills/use-ravion/project-config.md)                        |
+| Build and ship code, automate deploys, roll back                            | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md)                                  |
+| Inspect state, debug a failure, read logs                                   | [`skills/use-ravion/operations.md`](https://www.ravion.com/skills/use-ravion/operations.md)                                |
+| Run GitHub Actions jobs on Ravion runners, migrate `runs-on`                | [Migrate GitHub Actions workflows](https://www.ravion.com/docs/github-actions/migrate-workflows.md)                        |
+| Run GitLab CI jobs on Ravion runners, write their `tags`                    | [`skills/use-ravion/pipelines.md`](https://www.ravion.com/skills/use-ravion/pipelines.md#gitlab-ci-jobs-on-ravion-runners) |
+| Install the CLI, sign in, finish setup, connect AWS or Git, config on merge | [`skills/use-ravion/setup.md`](https://www.ravion.com/skills/use-ravion/setup.md)                                          |
+| Anything else — custom domains, secrets, quotas, a specific error           | Search the docs, per [Look things up](#look-things-up) below                                                               |
 
 ## Preflight
 
