@@ -92,3 +92,22 @@ ravion deploy wait <new-deployment-id> --watch                # use the ID retur
 Both rollback commands take deployment IDs (`mdep_...`), not module instance IDs (`minst_...`). Choose a target from `rollback-candidates`, then wait on the new deployment returned by `rollback`, not the target deployment.
 
 Reference: [pipeline config file](https://www.ravion.com/docs/config-as-code/pipeline-config-file), [step types](https://www.ravion.com/docs/pipelines/step-types), [templating](https://www.ravion.com/docs/pipelines/templating).
+
+## GitLab CI jobs on Ravion runners
+
+A GitLab CI job asks for a Ravion runner with one tag in its `tags`, using the GitHub runner label keys **without `id`**. Write it as one tag or as a list with a bare `ravion` tag; both mean the same:
+
+```yaml
+default:
+  tags: ["ravion/ee=gitlab-ci/type=sandbox/cpu=4/memory=16"]
+
+build:
+  tags:
+    [ravion, ee=gitlab-ci, type=sandbox, cpu=8, memory=32, interruptible=true]
+```
+
+- `ee` (given ID or `ee_…`) and `type` (`sandbox`, `ec2`, `ec2-spot`) are required. Sandboxes need `cpu` and `memory` and take `disk` and `interruptible`. Kept disks don't work for GitLab jobs yet: leave `disk_cache` out or set it to `off`. Any other `disk_cache` value, like `cpu=auto` sizing, fails the job (`GITLAB_RUNNER_TAG_SETTING_UNSUPPORTED`). EC2 needs `instance_size` (several joined with `+`) and takes `disk`.
+- Never add `id=`: GitLab hands each runner one job at a time, and a tag with `id` fails the job (`GITLAB_RUNNER_TAG_INVALID`). Use one Ravion tag per job and keep unrelated tags off Ravion jobs, because every tag becomes part of the runner's tag set.
+- Tags are case-sensitive. A job's own `tags` replace `default: tags`.
+- Connect the group or project in the dashboard under Settings → GitLab Runners (group Owner or project Maintainer). GitLab runners are in early access, so the organization must have them enabled. Add `interruptible=true` only to jobs that are safe to rerun from the start.
+- A job Ravion could not run is failed in GitLab with `runner_system_failure` and an explanation in its log. Retry it from GitLab, or add `retry: { when: runner_system_failure }` to the job.
